@@ -1,0 +1,208 @@
+:root {
+  --primary: #f70;
+  --primary-gray: #FFDCC2;
+  --primary-gray-dark: #EDB489;
+  --background-op:rgba(255,255,255,.5);
+  --price: #f60;
+  --og: #ddaa55;
+  
+  --red: #f44;
+  --green: #33BB44;
+  --yellow: #ffc00b;
+  --orange: #F4AE45;
+  --white: #ffffff;
+  --blue: #4488FF;
+  --border-radius: 9px;
+  --font-size-base: 14px;
+  --font-size-title: 16px;
+  --font-size-middle: 14px;
+  --font-size-large: 16px;
+  --font-size-big: 18px;
+
+  --background-color: #ffffff;
+  --background-color-gray: #F3F5F6;
+  --border-color: #E9EEF0;
+  --border:1px solid #E9EEF0;
+
+  --text-color: #3F4656;
+  --text-color-gray: #8D909A;
+  --green-dark: #0a7d00;
+  --red-dark: #d10000;
+  --yellow-dark: #d0a21f;
+  --primary-dark: #E86B1D;
+
+  --warn-color-bg:#FFE9DD;
+  --warn-color:#ff7711;
+
+  --spacing: 10px;
+  --spacing-min: 5px;
+  --spacing-large: 16px;
+
+  --error-border-color: #ffe7e7;
+  --error-background-color: #fff0f0;
+
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  --mask-color:rgba(0, 0, 0, 0.2);
+
+  --font-size-h1: 24px;
+  --font-size-h2: 20px;
+  --font-size-h3: 18px;
+  --font-size-h4: 16px;
+  --font-size-h5: 14px;
+  --font-size-h6: 12px;
+
+  --tag-color-0: #eb706b;
+  --tag-color-1: #537ef6;
+  --tag-color-2: #a3e74f;
+  --tag-color-3: #f18f36;
+  --tag-color-4: #6ebff9;
+  --tag-color-5: #f0c647;
+  --tag-color-6: #f2a3bd;
+  --tag-color-7: #9eb9bc;
+  --tag-color-8: #827ef7;
+  --tag-color-9: #58c0d4;
+  --tag-color-10: #d88dee;
+  --tag-color-11: #d58e8c;
+  --tag-color-12: #72cc6c;
+  --tag-color-13: #e4c443;
+  --tag-color-14: #6fdbb8;
+}
+
+[data-theme="dark"] {
+  // --background-color-gray: #121212;
+  // --background-color: #202020;
+  // --border-color: #353535;
+  // --text-color: #f6f6f6;
+  // --text-color-gray: #656565;
+  // --background-color-gray: #292c34;
+
+  --background-op:rgba(0,0,0,.5);
+  --background-color-gray: #25272C;
+  --border-color: #32333E;
+  --background-color: #1B1D21;
+
+  // --background-color: #2e323a;
+  // --background-color-gray: #26282F;
+  // --border-color:#41454E;
+  
+  --primary-gray: #363539;
+  --primary-gray-dark: #3E3839;
+
+  --border:1px solid #41454E;
+  --text-color: #dfe2eb;
+  --text-color-gray: #a7acbb;
+
+  --warn-color-bg:#433634;
+  --warn-color:#ff7711;
+
+  --shadow: 0 16px 30px rgba(0, 0, 0, 0.6);
+  --mask-color:rgba(0, 0, 0, 0.4);
+}
+[data-size="small"] {
+  --font-size-base: 12px;
+}
+[data-size="middle"] {
+  --font-size-base: 13px;
+}
+[data-size="default"] {
+  --font-size-base: 14px;
+}
+[data-size="large"] {
+  --font-size-base: 16px;
+}
+body {
+  color: var(--text-color);
+  background-color: var(--background-color);
+  font-size: var(--font-size-base);
+}
+// @import url(https://fonts.bunny.net/css?family=alexandria:100,200,300,400,500,600,700,800,900|allerta:400);
+// @import url(https://fonts.bunny.net/css?family=alexandria:100,200,300,400,500,600,700,800,900|allerta:400|asap-condensed:200,200i,300,300i,400,500,600,700,800,900);
+* {
+  vertical-align: baseline;
+  font-weight: inherit;
+  font-style: inherit;
+  font-size: 100%;
+  outline: 0;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  font-family:'Geologicas', monospace, Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  // font-family: sans-serif;
+  box-sizing: border-box;
+}
+a{
+  text-decoration: none;
+  color: var(--text-color);
+}
+input,
+select,
+textarea {
+  color: var(--text-color);
+  display: block;
+  width: 100%;
+  appearance: none;
+  &::placeholder {
+  color: var(--text-color-gray);
+  }
+}
+a{
+  color: var(--primary);
+}
+.flex {
+  display: flex;
+  &-c {
+    display: flex;
+    align-items: center;
+    &-c {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    &-sb {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+  }
+  &-column {
+    display: flex;
+    flex-direction: column;
+  }
+  &-1 {
+    flex: 1;
+  }
+}
+
+
+.container{
+  max-width: 1400px;
+  margin:0 auto;
+}
+
+.titles{
+  font-size: 34px;
+  font-weight: 800;
+  margin-bottom:var(--spacing);
+  span{
+    color: var(--primary);
+    text-transform: uppercase;
+  }
+}
+.title{
+  font-size: 16px;
+  color:var(--text-color);
+}
+.text_main{
+  color:var(--primary);
+  font-weight:800;
+}
+.text_link{
+  color:var(--primary);
+}
+.text_min{
+  font-size: 12px;
+}
+.text_sub,.title_sub{
+  font-size: 12px;
+  color:var(--text-color-gray);
+}
