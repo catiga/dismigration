@@ -8,16 +8,21 @@ import { getLocal } from "../../utils"
 import { useEffect, useState } from "react";
 import Button from '../../component/Button';
 
+
 export default function Header(props) {
   const { accounts, currentTokenBalance } = useGlobal()
   const { chainId, network } = useWallet()
   const { handleChangeNetwork } = props
   const [currentBalance, setCurrentBalance] = useState()
+  const [showWallet, setShowWallet] = useState('')
   useEffect(() => {
     if(currentTokenBalance) {
       setCurrentBalance(currentTokenBalance)
     }
-  }, [currentTokenBalance])
+    if(accounts) {
+      setShowWallet(accounts[0].substring(0, 4) + '***' + accounts[0].substring(accounts[0].length - 4))
+    }
+  }, [currentTokenBalance, accounts])
   return (
     <HeaderContanier>
       <div className="header-content">
@@ -27,7 +32,7 @@ export default function Header(props) {
           </a>
         </div>
         {
-          (!accounts || !getLocal('account')) && <ConnectButton />
+          (!accounts && !getLocal('account')) && <ConnectButton />
         }
         
         {
@@ -38,7 +43,7 @@ export default function Header(props) {
               <ErrorNetwork handleChangeNetwork={handleChangeNetwork}/>
             }
             <div>
-              <Button label={`${Number(currentBalance).toFixed(4)}  ${network}`}></Button>
+              <Button label={showWallet}></Button>
             </div>
           </div>
         }

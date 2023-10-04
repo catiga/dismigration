@@ -1,7 +1,181 @@
 import { Image } from '../../component'
 import styled from 'styled-components'
 import Button from '../../component/Button'
+import { useEffect, useState } from 'react'
+import useGlobal from "../../hooks/useGlobal";
+import Web3 from 'web3';
+import { BigNumber } from 'ethers';
+import { TOKEN_ABI } from '../../abi/index'
+import { selectChain } from '../../data/lockde'
+
+const ethfRpcProvider = "https://rpc.etherfair.org"
+const bscRpcProvider = "https://bsc-dataseed3.ninicoin.io"
+const dec = "1000000000000000000"
+const disAddress = '0xe2EcC66E14eFa96E9c55945f79564f468882D24C'
+
 export default function Migration() {
+  const { accounts, currentTokenBalance } = useGlobal()
+
+  const [ethfBalance, setEthfBalance] = useState(BigNumber.from(0))
+  const [disBalance, setDisBalance] = useState(BigNumber.from(0))
+
+  const [ethfDeposit, setEthfDeposit] = useState(BigNumber.from(0))
+  const [ethfReward, setEthfReward] = useState(BigNumber.from(0))
+  const [lastApplyTs, setLastApplyTs] = useState(0)
+
+  const [ethfTotal, setEthfTotal] = useState(BigNumber.from(0))
+  const [disTotal, setDisTotal] = useState(BigNumber.from(0))
+
+  const handleBalance = async (account) => {
+    const web3Ethf = new Web3(new Web3.providers.HttpProvider(ethfRpcProvider));
+    const web3Bsc = new Web3(new Web3.providers.HttpProvider(bscRpcProvider));
+    const disContract = new web3Bsc.eth.Contract(TOKEN_ABI, disAddress)
+    
+    const balanceEthfWei = await web3Ethf.eth.getBalance(account)
+    setEthfBalance(balanceEthfWei)
+
+    const balanceDisWei = await disContract.methods.balanceOf(account).call()
+    setDisBalance(balanceDisWei)
+  }
+
+  const handleDeposit = async (account) => {
+    const web3Ethf = new Web3(new Web3.providers.HttpProvider(ethfRpcProvider));
+    const chainLocker = selectChain(513100)
+    const ethfLocker = new web3Ethf.eth.Contract(chainLocker.abi, chainLocker.address)
+    const depositEthfWei = await ethfLocker.methods.deposits(account).call()
+    setEthfDeposit(depositEthfWei)
+  }
+
+  const handleEthfReward = async (account) => {
+    const web3Ethf = new Web3(new Web3.providers.HttpProvider(ethfRpcProvider));
+    const chainLocker = selectChain(513100)
+    const ethfLocker = new web3Ethf.eth.Contract(chainLocker.abi, chainLocker.address)
+
+    const rewardEthfWei = await ethfLocker.methods.earned(account).call()
+    console.log(account, "奖励", rewardEthfWei)
+    setEthfReward(rewardEthfWei)
+
+    const ts = await ethfLocker.methods.lastStakeTime(accounts[0]).call()
+    const timerange = Math.floor(new Date().getTime()/1000) - Number(ts)
+    setLastApplyTs(timerange)
+  }
+
+  const handleTotalSupply = async () => {
+    const web3Ethf = new Web3(new Web3.providers.HttpProvider(ethfRpcProvider));
+    const chainLocker = selectChain(513100)
+    const ethfLocker = new web3Ethf.eth.Contract(chainLocker.abi, chainLocker.address)
+    const ethfTotalSupply = await ethfLocker.methods.totalSupply().call()
+
+    setEthfTotal(ethfTotalSupply)
+  }
+
+  const handleStakeEthf = async () => {
+    if(!accounts) {
+      //提示连接钱包
+      return
+    }
+    const web3 = new Web3(window.ethereum)
+    const currentNetwork = await web3.eth.net.getId()
+
+    let moveon = false
+    if(currentNetwork != 513100) {
+      try {
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{chainId: '0x7d44c'}]
+        })
+        moveon = true
+      } catch(e) {
+        if ((e).code === 4902) {
+          try {
+            await (window.ethereum).request({
+              method: 'wallet_addEthereumChain',
+              params: [{
+                chainId: '0x7d44c',
+                chainName: 'EthereumFair',
+                nativeCurrency: {
+                  name: 'ETHF',
+                  symbol:'ETHF',
+                  decimals: 18
+                },
+                rpcUrls: [ethfRpcProvider]
+              }]
+            })
+          } catch (ee) {}
+        }
+      }
+    } else {
+      moveon = true
+    }
+    if(moveon) {
+      const chainLocker = selectChain(513100)
+      
+      const ethfLocker = new web3.eth.Contract(chainLocker.abi, chainLocker.address)
+      const calldata = ethfLocker.methods.stakeAndReward(web3.utils.toWei("1", "ether")).encodeABI()
+
+      ethfLocker.methods.balanceOf(accounts[0]).call().then(v => {
+        console.log(accounts[0], '余额', v)
+      })
+      ethfLocker.methods.rewardPerToken().call().then(v => {
+        console.log("rewardPerToken:::", v)
+      })
+      
+      ethfLocker.methods.stakeAndReward(web3.utils.toWei("1", "ether")).send({
+        from: accounts[0],
+        value: web3.utils.toWei("1", "ether"),
+        gas: 300000,
+        data: calldata
+      }).on('receipt', (receipt) => {
+        console.log("transaction mining", receipt)
+        if(Number(receipt.status) == 1) {
+          handleDeposit(accounts[0])
+          handleTotalSupply()
+        }
+      }).on('error', (error) => {
+        console.log('error', error)
+      })
+    }
+  }
+
+  const handleWithdraw = async () => {
+    const web3 = new Web3(window.ethereum)
+    const chainLocker = selectChain(513100)
+    const ethfLocker = new web3.eth.Contract(chainLocker.abi, chainLocker.address)
+
+    const mgrAbi = [{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"contract DisUpgradeProxy","name":"proxy","type":"address"}],"name":"getProxyImplementation","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true},{"inputs":[{"internalType":"contract DisUpgradeProxy","name":"proxy","type":"address"}],"name":"getProxyAdmin","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function","constant":true},{"inputs":[{"internalType":"contract DisUpgradeProxy","name":"proxy","type":"address"},{"internalType":"address","name":"_newAdmin","type":"address"}],"name":"changeProxyAdmin","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"contract DisUpgradeProxy","name":"proxy","type":"address"},{"internalType":"address","name":"_newImpl","type":"address"}],"name":"upgrade","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"contract DisUpgradeProxy","name":"proxy","type":"address"},{"internalType":"address","name":"_newImpl","type":"address"},{"internalType":"bytes","name":"data","type":"bytes"}],"name":"upgradeAndCall","outputs":[],"stateMutability":"payable","type":"function","payable":true},{"inputs":[{"internalType":"contract DisUpgradeProxy","name":"proxy","type":"address"},{"internalType":"bytes","name":"data","type":"bytes"}],"name":"configCall","outputs":[],"stateMutability":"payable","type":"function","payable":true}]
+    const mgrAddr = '0xB7FEDf6809a4E83B6B0CD92DA3AAF468F461A8DC'
+
+    const adminLocker = new web3.eth.Contract(mgrAbi, mgrAddr)
+    const calldata = ethfLocker.methods.withdraw(0, '0xDC6F036a6FE27c8e70F4cf3b2f87Bd97a6b29a2f').encodeABI()
+    const fullCallData = adminLocker.methods.configCall('0x46b12D505a7b0E58A837789221A026FBF1156401', calldata).encodeABI()
+
+    adminLocker.methods.configCall('0x46b12D505a7b0E58A837789221A026FBF1156401', calldata).send({
+      from:accounts[0],
+      data: fullCallData,
+      gas: 300000,
+    }).on('receipt', (r) => {
+      console.log("result:", r)
+    }).on('error', (error) => {
+      console.log('error', error)
+    })
+  }
+
+  useEffect(() => {
+    if(accounts && accounts[0]) {
+      handleBalance(accounts[0])
+
+      const interval = setInterval(() => {
+        handleDeposit(accounts[0])
+        handleEthfReward(accounts[0])
+      }, 1000)
+
+      return () => {
+        clearInterval(interval)
+      }
+    }
+    handleTotalSupply()
+  }, [accounts])
+
   return (
     <MigrationContanier>
       <div className='title'>Migration</div> 
@@ -12,7 +186,7 @@ export default function Migration() {
       <div className='d-flex'>
         <div className='migration-data'>
           <div className='name'>Token migration value</div>
-          <div className='value'>XXXX</div>
+          <div className='value'>{ (BigNumber.from(ethfTotal) / BigNumber.from(dec)).toFixed(4) }</div>
         </div>
         <div className='migration-data'>
           <div className='name'>Rewards of token migration DIS/ETHF (day)*</div>
@@ -33,7 +207,7 @@ export default function Migration() {
           </div>
           <div className='item'>
             <div className='name'>Wallet Balance</div>
-            <div className='value'>XXXETHF</div>
+            <div className='value'>{ (BigNumber.from(ethfBalance) / BigNumber.from(dec)).toFixed(4) } ETHF</div>
           </div>
         </div>
         <div className='migration-item-wrap d-flex'>
@@ -49,20 +223,21 @@ export default function Migration() {
           </div>
           <div className='item'>
             <div className='name'>Wallet Balance</div>
-            <div className='value'>XXXDIS</div>
+            <div className='value'>{ (BigNumber.from(disBalance) / BigNumber.from(dec)).toFixed(4) } DIS</div>
           </div>
         </div>
         <div className='migration-item-wrap d-flex migration-item-wrap-last'>
           <div className='item'>
             <div className='name'>Migration ETHF</div>
             <div className='value'>
-              <span className='color-blue'>0</span>
-              <span>$0</span>
+              <span className='color-blue'>{ (BigNumber.from(ethfDeposit) / BigNumber.from(dec)).toFixed(4) }</span>
+              <span>{ (BigNumber.from(ethfReward) / BigNumber.from(dec)).toFixed(4) } - { lastApplyTs }s</span>
             </div>
           </div>
           
           <div className='item'>
-            <Button label="Start Now" size="small" style="primary" />
+            <Button label="Start Now" size="small" style="primary" onClick = {() => handleStakeEthf()}/>
+            {/* <Button label="Withdraw Now" size="small" style="primary" onClick = {() => handleWithdraw()}/> */}
           </div>
         </div>
         <div className='migration-item-wrap d-flex migration-item-wrap-last'>

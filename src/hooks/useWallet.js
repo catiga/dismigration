@@ -36,20 +36,48 @@ export default function useWallet() {
       showConnectNetwork: false
     })
     const account = await window.ethereum.request({ method: 'eth_requestAccounts' })
-    console.log(account, 'account')
-    handleNewAccounts(account)
-    const { name, decimals, symbol, chainId, rpcUrls, chainName, blockExplorerUrls } = token[network]
-    const nativeCurrency = { name, decimals, symbol }
-    let params = [{
-      chainId,
-      rpcUrls,
-      chainName,
-      nativeCurrency,
-      blockExplorerUrls
-    }]
+    console.log(account, 'account', network)
+    setLocal('isConnect', 1)
+    setState({
+      accounts: account
+    })
 
-    await window.ethereum?.request({ method: 'wallet_addEthereumChain', params })
-    getAccounInfo(account)
+    // insert new code
+    // Listening for accounts changed event
+    window.ethereum.on('accountsChanged', (accounts) => {
+      console.log('Accounts changed:', accounts);
+      setState({
+        accounts: accounts
+      });
+    });
+    window.ethereum.on('disconnect', (error) => {
+      console.log('Disconnected:', error);
+      setLocal('isConnect', 0);
+      setState({
+        accounts: []
+      });
+      // Handle disconnect event as needed
+    });
+
+    // return () => {
+    //   window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
+    //   window.ethereum.removeListener('disconnect', handleDisconnect);
+    // };
+
+    // getCurrentBalance(account[0])
+    // handleNewAccounts(account)
+    // const { name, decimals, symbol, chainId, rpcUrls, chainName, blockExplorerUrls } = token[network]
+    // const nativeCurrency = { name, decimals, symbol }
+    // let params = [{
+    //   chainId,
+    //   rpcUrls,
+    //   chainName,
+    //   nativeCurrency,
+    //   blockExplorerUrls
+    // }]
+
+    // await window.ethereum?.request({ method: 'wallet_addEthereumChain', params })
+    // getAccounInfo(account)
   }
   const handleNewAccounts = newAccounts => {
     getNetworkInfo()
