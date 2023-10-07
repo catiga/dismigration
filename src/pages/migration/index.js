@@ -235,7 +235,11 @@ export default function Migration() {
             </div>
           </div>
           
-          <div className='item'>
+          <div className='item item-end'>
+            <div className='item-input-box'>
+              <input placeholder='Input' />
+              <button>Max</button>
+            </div>
             <Button label="Start Now" size="small" style="primary" onClick = {() => handleStakeEthf()}/>
             {/* <Button label="Withdraw Now" size="small" style="primary" onClick = {() => handleWithdraw()}/> */}
           </div>
@@ -249,7 +253,11 @@ export default function Migration() {
             </div>
           </div>
           
-          <div className='item'>
+          <div className='item item-end'>
+            <div className='item-input-box'>
+              <input placeholder='Input' />
+              <button>Max</button>
+            </div>
             <Button label="Start Now" size="small" style="primary" />
           </div>
         </div>
@@ -328,7 +336,7 @@ const MigrationContanier = styled.div`
   .migration-item-wrap {
     width: 581px;
     height: 125px;
-    padding: 6px 48px 20px;
+    padding: 6px 38px 20px;
     background-color: #ffffff;
     border-radius: 30px;
     border: solid 1px #d5d8dc;
@@ -337,7 +345,7 @@ const MigrationContanier = styled.div`
     justify-content: space-between;
     margin-bottom: 20px;
     &-last {
-      padding: 0 48px;
+      padding: 0 38px;
     }
     &-full {
       width: 100%
@@ -345,6 +353,26 @@ const MigrationContanier = styled.div`
     .color-blue {
       font-size: 32px;
       margin-right: 20px;
+    }
+    .item-input-box {
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+      margin-bottom: 12px;
+      > input {
+        flex: 1;
+        border: 1px solid #d5d8dc;
+        padding: 6px 12px;
+        border-radius: 60px 0 0 60px;
+      }
+      > button {
+        width: 50px;
+        background: #1868dc;
+        color: #fff;
+        align-self: stretch;
+        border-radius: 0 60px 60px 0;
+        cursor: pointer;
+      }
     }
     .item {
       display: flex;
@@ -355,6 +383,9 @@ const MigrationContanier = styled.div`
         line-height: 49px;
         letter-spacing: 0px;
         color: #3e445b;
+      }
+      &.item-end {
+        align-items: flex-end;
       }
       &:not(:first-child) {
         .name {
