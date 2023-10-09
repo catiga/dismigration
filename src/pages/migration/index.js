@@ -406,7 +406,7 @@ export default function Migration() {
         </div>
         <div className='migration-item-wrap d-flex migration-item-wrap-full migration-item-wrap-last'>
           <div className='item'>
-            <div className='name'>Claimable ETHF</div>
+            <div className='name'>Claimable DisChain(DIS)</div>
             <div className='value'>
               <span className='color-blue'>0</span>
               <span>$0</span>
