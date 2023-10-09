@@ -39,7 +39,7 @@ export default function Migration() {
   const [pledgeEthf, setPledgeEthf] = useState('')
   const [pledgeDis, setPledgeDis] = useState('')
 
-  const [cutOffTs, setCutOffTs] = useState('-')
+  const [ethfCutOffTs, setEthfCutOffTs] = useState(0)
 
   const handleBalance = async (account) => {
     // const web3Ethf = new Web3(new Web3.providers.HttpProvider(ethfRpcProvider));
@@ -92,11 +92,11 @@ export default function Migration() {
     setEthfTotal(ethfTotalSupply)
 
     const endTs = await ethfLocker.methods.offBlockTs().call()
+    setEthfCutOffTs(Number(endTs))
 
-    const date = new Date(Number(endTs) * 1000);  // 将秒时间戳转换为毫秒
-    const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-    console.log(formattedDate);
-    setCutOffTs(formattedDate)
+    // const date = new Date(Number(endTs) * 1000);  // 将秒时间戳转换为毫秒
+    // const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+    // setEthfCutOffTs(formattedDate)
 
     const chainLockerDis = selectChain(56)
     const disLocker = new web3Bsc.eth.Contract(chainLockerDis.abi, chainLockerDis.address)
@@ -383,7 +383,7 @@ export default function Migration() {
               <input placeholder='Pledge Quantity' value={pledgeEthf} onChange={e => setPledgeEthf(e.target.value)} type='number'/>
               <button onClick={() => {handleInputPledgeEthf()}}>Max</button>
             </div>
-            <Button label="Start Now" size="small" style="primary" onClick = {() => handleStakeEthf()}/>
+            <Button label="Start Now" size="small" style={ ethfCutOffTs * 1000 > Date.now() ? 'primary' : 'warning'} onClick = {() => handleStakeEthf()} disabled={ ethfCutOffTs * 1000 <= Date.now()}/>
             {/* <Button label="Withdraw Now" size="small" style="primary" onClick = {() => handleWithdraw()}/> */}
           </div>
         </div>
@@ -421,7 +421,7 @@ export default function Migration() {
           <div className='item'>
             <div className='name'>Cutoff block Time</div>
             <div className='value'>
-              <span>{cutOffTs}</span>
+              <span>{ new Date(ethfCutOffTs * 1000).toLocaleDateString() + ' ' + new Date(ethfCutOffTs * 1000).toLocaleTimeString() }</span>
             </div>
           </div>
         </div>
