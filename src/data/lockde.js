@@ -15,7 +15,7 @@ export const createMulChainLocker = (
 }
 
 const mulChainTransfer = {
-  // BSC: createMulChainLocker(upgradeAbi, '0x2Ee7e0c5A294A36E7DF042Cd4b584f9b1a82eB48', 56, 'BSC'),
+  BSC: createMulChainLocker(upgradeAbi, '0xe218A4F06677742E62b2b4Ee6d83f7eCA11A2787', 56, 'BSC'),
   ETHF: createMulChainLocker(upgradeAbi, '0x2B090A773403FfD037D97F0d1A56c311C38194CE', 513100, 'ETHF'),
 }
 

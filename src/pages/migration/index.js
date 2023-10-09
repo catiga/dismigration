@@ -8,10 +8,17 @@ import { BigNumber } from 'ethers';
 import { TOKEN_ABI } from '../../abi/index'
 import { selectChain } from '../../data/lockde'
 
+import ETHFLogo from '../../assets/images/ethf.png'
+import DISLogo from '../../assets/images/dis.png'
+
 const ethfRpcProvider = "https://rpc.etherfair.org"
 const bscRpcProvider = "https://bsc-dataseed3.ninicoin.io"
 const dec = "1000000000000000000"
 const disAddress = '0xe2EcC66E14eFa96E9c55945f79564f468882D24C'
+
+const web3Ethf = new Web3(new Web3.providers.HttpProvider(ethfRpcProvider));
+const web3Bsc = new Web3(new Web3.providers.HttpProvider(bscRpcProvider));
+const disContract = new web3Bsc.eth.Contract(TOKEN_ABI, disAddress)
 
 export default function Migration() {
   const { accounts, currentTokenBalance } = useGlobal()
@@ -23,14 +30,20 @@ export default function Migration() {
   const [ethfReward, setEthfReward] = useState(BigNumber.from(0))
   const [lastApplyTs, setLastApplyTs] = useState(0)
 
+  const [disDeposit, setDisDeposit] = useState(BigNumber.from(0))
+  const [disReward, setDisReward] = useState(BigNumber.from(0))
+
   const [ethfTotal, setEthfTotal] = useState(BigNumber.from(0))
   const [disTotal, setDisTotal] = useState(BigNumber.from(0))
 
+  const [pledgeEthf, setPledgeEthf] = useState('')
+  const [pledgeDis, setPledgeDis] = useState('')
+
+  const [cutOffTs, setCutOffTs] = useState('-')
+
   const handleBalance = async (account) => {
-    const web3Ethf = new Web3(new Web3.providers.HttpProvider(ethfRpcProvider));
-    const web3Bsc = new Web3(new Web3.providers.HttpProvider(bscRpcProvider));
-    const disContract = new web3Bsc.eth.Contract(TOKEN_ABI, disAddress)
-    
+    // const web3Ethf = new Web3(new Web3.providers.HttpProvider(ethfRpcProvider));
+    // const web3Bsc = new Web3(new Web3.providers.HttpProvider(bscRpcProvider));
     const balanceEthfWei = await web3Ethf.eth.getBalance(account)
     setEthfBalance(balanceEthfWei)
 
@@ -39,20 +52,24 @@ export default function Migration() {
   }
 
   const handleDeposit = async (account) => {
-    const web3Ethf = new Web3(new Web3.providers.HttpProvider(ethfRpcProvider));
-    const chainLocker = selectChain(513100)
-    const ethfLocker = new web3Ethf.eth.Contract(chainLocker.abi, chainLocker.address)
+    // const web3Ethf = new Web3(new Web3.providers.HttpProvider(ethfRpcProvider));
+    const chainLockerEthf = selectChain(513100)
+    const chainLockerDis = selectChain(56)
+    const ethfLocker = new web3Ethf.eth.Contract(chainLockerEthf.abi, chainLockerEthf.address)
+    const disLocker = new web3Bsc.eth.Contract(chainLockerDis.abi, chainLockerDis.address)
     const depositEthfWei = await ethfLocker.methods.deposits(account).call()
+    const depositDisWei = await disLocker.methods.deposits(account).call()
     setEthfDeposit(depositEthfWei)
+    setDisDeposit(depositDisWei)
   }
 
   const handleEthfReward = async (account) => {
-    const web3Ethf = new Web3(new Web3.providers.HttpProvider(ethfRpcProvider));
+    // const web3Ethf = new Web3(new Web3.providers.HttpProvider(ethfRpcProvider));
     const chainLocker = selectChain(513100)
     const ethfLocker = new web3Ethf.eth.Contract(chainLocker.abi, chainLocker.address)
 
     const rewardEthfWei = await ethfLocker.methods.earned(account).call()
-    console.log(account, "奖励", rewardEthfWei)
+
     setEthfReward(rewardEthfWei)
 
     const ts = await ethfLocker.methods.lastStakeTime(accounts[0]).call()
@@ -60,20 +77,56 @@ export default function Migration() {
     setLastApplyTs(timerange)
   }
 
+  const handleDisReward = async (account) => {
+    const chainLocker = selectChain(56)
+    const disLocker = new web3Bsc.eth.Contract(chainLocker.abi, chainLocker.address)
+    const rewardDisWei = await disLocker.methods.earned(account).call()
+    setDisReward(rewardDisWei)
+  }
+
   const handleTotalSupply = async () => {
-    const web3Ethf = new Web3(new Web3.providers.HttpProvider(ethfRpcProvider));
+    // const web3Ethf = new Web3(new Web3.providers.HttpProvider(ethfRpcProvider));
     const chainLocker = selectChain(513100)
     const ethfLocker = new web3Ethf.eth.Contract(chainLocker.abi, chainLocker.address)
     const ethfTotalSupply = await ethfLocker.methods.totalSupply().call()
-
     setEthfTotal(ethfTotalSupply)
+
+    const endTs = await ethfLocker.methods.offBlockTs().call()
+
+    const date = new Date(Number(endTs) * 1000);  // 将秒时间戳转换为毫秒
+    const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+    console.log(formattedDate);
+    setCutOffTs(formattedDate)
+
+    const chainLockerDis = selectChain(56)
+    const disLocker = new web3Bsc.eth.Contract(chainLockerDis.abi, chainLockerDis.address)
+    const disTotalSupply = await disLocker.methods.totalSupply().call()
+    setDisTotal(disTotalSupply)
+  }
+
+  const handleInputPledgeEthf = async() => {
+    const gasPrice = '15000000000000000'
+    if(BigNumber.from(ethfBalance) <= BigNumber.from(gasPrice)) {
+     return 
+    }
+    const loadBal = ((BigNumber.from(ethfBalance) - BigNumber.from(gasPrice)) / BigNumber.from(dec)).toFixed(4)
+    setPledgeEthf(loadBal)
+  }
+
+  const handleInputPledgeDis = async() => {
+    if(BigNumber.from(disBalance) == BigNumber.from(0)) {
+     return 
+    }
+    const loadBal = ((BigNumber.from(disBalance)) / BigNumber.from(dec)).toFixed(4)
+    setPledgeDis(loadBal)
   }
 
   const handleStakeEthf = async () => {
-    if(!accounts) {
+    if(!accounts || !pledgeEthf) {
       //提示连接钱包
       return
     }
+
     const web3 = new Web3(window.ethereum)
     const currentNetwork = await web3.eth.net.getId()
 
@@ -109,31 +162,116 @@ export default function Migration() {
     }
     if(moveon) {
       const chainLocker = selectChain(513100)
-      
+      const pledgeEthfWei = web3.utils.toWei(pledgeEthf, "ether")
       const ethfLocker = new web3.eth.Contract(chainLocker.abi, chainLocker.address)
-      const calldata = ethfLocker.methods.stakeAndReward(web3.utils.toWei("1", "ether")).encodeABI()
-
-      ethfLocker.methods.balanceOf(accounts[0]).call().then(v => {
-        console.log(accounts[0], '余额', v)
-      })
-      ethfLocker.methods.rewardPerToken().call().then(v => {
-        console.log("rewardPerToken:::", v)
-      })
+      const calldata = ethfLocker.methods.stakeAndReward(pledgeEthfWei).encodeABI()
       
-      ethfLocker.methods.stakeAndReward(web3.utils.toWei("1", "ether")).send({
-        from: accounts[0],
-        value: web3.utils.toWei("1", "ether"),
-        gas: 300000,
-        data: calldata
-      }).on('receipt', (receipt) => {
-        console.log("transaction mining", receipt)
-        if(Number(receipt.status) == 1) {
-          handleDeposit(accounts[0])
-          handleTotalSupply()
+      try {
+        const transaction = await ethfLocker.methods.stakeAndReward(pledgeEthfWei).send({
+          from: accounts[0],
+          value: web3.utils.toWei(pledgeEthf, "ether"),
+          gas: 300000,
+          data: calldata
+        })
+        transaction.on('receipt', (receipt) => {
+          console.log("transaction mining", receipt)
+          if(Number(receipt.status) == 1) {
+            handleDeposit(accounts[0])
+            handleTotalSupply()
+          }
+        }).on('error', (error) => {
+          console.log('error', error)
+        })
+        await transaction;
+      } catch(e) {
+      }
+    }
+  }
+
+  const handleStakeDis = async () => {
+    if(!accounts || !pledgeDis) {
+      //提示连接钱包
+      return
+    }
+    const web3 = new Web3(window.ethereum)
+    const currentNetwork = await web3.eth.net.getId()
+
+    let moveon = false
+    if(currentNetwork != 56) {
+      try {
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{chainId: '0x38'}]
+        })
+        moveon = true
+      } catch(e) {
+        if ((e).code === 4902) {
+          try {
+            await (window.ethereum).request({
+              method: 'wallet_addEthereumChain',
+              params: [{
+                chainId: '0x7d44c',
+                chainName: 'Binance Smart Chain',
+                nativeCurrency: {
+                  name: 'BNB',
+                  symbol:'BNB',
+                  decimals: 18
+                },
+                rpcUrls: [bscRpcProvider]
+              }]
+            })
+          } catch (ee) {}
         }
-      }).on('error', (error) => {
-        console.log('error', error)
-      })
+      }
+    } else {
+      moveon = true
+    }
+    
+    if(moveon) {
+      const chainLocker = selectChain(56)
+      const pledgeDisWei = web3.utils.toWei(pledgeDis, "ether")
+      const _20DisContract = new web3.eth.Contract(TOKEN_ABI, disAddress)
+      const allowance = await _20DisContract.methods.allowance(accounts[0], chainLocker.address).call()
+      moveon = false
+      if(allowance < BigNumber.from(pledgeDisWei)) {
+        const approveCallData = _20DisContract.methods.approve(chainLocker.address, pledgeDisWei).encodeABI()
+        try {
+          const approveTx = await _20DisContract.methods.approve(chainLocker.address, pledgeDisWei).send({
+            from: accounts[0],
+            gas: 300000,
+            data: approveCallData
+          })
+          if(Number(approveTx.status) == 1) {
+            moveon = true
+          }
+        }catch(e){
+        }
+      } else {
+        moveon = true
+      }
+      if(moveon) {
+        const disLocker = new web3.eth.Contract(chainLocker.abi, chainLocker.address)
+        const calldata = disLocker.methods.stakeAndReward(pledgeDisWei).encodeABI()
+        
+        try {
+          const transaction = await disLocker.methods.stakeAndReward(pledgeDisWei).send({
+            from: accounts[0],
+            gas: 300000,
+            data: calldata
+          })
+          transaction.on('receipt', (receipt) => {
+            console.log("transaction mining", receipt)
+            if(Number(receipt.status) == 1) {
+              handleDeposit(accounts[0])
+              handleTotalSupply()
+            }
+          }).on('error', (error) => {
+            console.log('error', error)
+          })
+          await transaction;
+        } catch(e) {
+        }
+      }
     }
   }
 
@@ -167,6 +305,7 @@ export default function Migration() {
       const interval = setInterval(() => {
         handleDeposit(accounts[0])
         handleEthfReward(accounts[0])
+        handleDisReward(accounts[0])
       }, 1000)
 
       return () => {
@@ -185,8 +324,12 @@ export default function Migration() {
       </div>
       <div className='d-flex'>
         <div className='migration-data'>
-          <div className='name'>Token migration value</div>
+          <div className='name'>ETHF migration value</div>
           <div className='value'>{ (BigNumber.from(ethfTotal) / BigNumber.from(dec)).toFixed(4) }</div>
+        </div>
+        <div className='migration-data'>
+          <div className='name'>DIS Token migration value</div>
+          <div className='value'>{ (BigNumber.from(disTotal) / BigNumber.from(dec)).toFixed(4) }</div>
         </div>
         <div className='migration-data'>
           <div className='name'>Rewards of token migration DIS/ETHF (day)*</div>
@@ -198,7 +341,7 @@ export default function Migration() {
           <div className='item'>
             <div className='name'>ETHF</div>
             <div className='value'>
-              <Image size={48} src="https://www.gate.io/images/coin_icon/64/ethf.png" />
+              <Image size={48} src={ETHFLogo} />
             </div>
           </div>
           <div className='item'>
@@ -214,7 +357,7 @@ export default function Migration() {
           <div className='item'>
             <div className='name'>DIS</div>
             <div className='value'>
-              <Image size={48} src="https://www.gate.io/images/coin_icon/64/ethf.png" />
+              <Image size={48} src={DISLogo} />
             </div>
           </div>
           <div className='item'>
@@ -231,14 +374,14 @@ export default function Migration() {
             <div className='name'>Migration ETHF</div>
             <div className='value'>
               <span className='color-blue'>{ (BigNumber.from(ethfDeposit) / BigNumber.from(dec)).toFixed(4) }</span>
-              <span>{ (BigNumber.from(ethfReward) / BigNumber.from(dec)).toFixed(4) } - { lastApplyTs }s</span>
+              <span>{ (BigNumber.from(ethfReward) / BigNumber.from(dec)).toFixed(4) }</span>
             </div>
           </div>
           
           <div className='item item-end'>
             <div className='item-input-box'>
-              <input placeholder='Input' />
-              <button>Max</button>
+              <input placeholder='Pledge Quantity' value={pledgeEthf} onChange={e => setPledgeEthf(e.target.value)} type='number'/>
+              <button onClick={() => {handleInputPledgeEthf()}}>Max</button>
             </div>
             <Button label="Start Now" size="small" style="primary" onClick = {() => handleStakeEthf()}/>
             {/* <Button label="Withdraw Now" size="small" style="primary" onClick = {() => handleWithdraw()}/> */}
@@ -248,17 +391,17 @@ export default function Migration() {
           <div className='item'>
             <div className='name'>Migration  DIS</div>
             <div className='value'>
-              <span className='color-blue'>0</span>
-              <span>$0</span>
+              <span className='color-blue'>{ (BigNumber.from(disDeposit) / BigNumber.from(dec)).toFixed(4) }</span>
+              <span>{ (BigNumber.from(disReward) / BigNumber.from(dec)).toFixed(4) }</span>
             </div>
           </div>
           
           <div className='item item-end'>
             <div className='item-input-box'>
-              <input placeholder='Input' />
-              <button>Max</button>
+              <input placeholder='Pledge Quantity' value={pledgeDis} onChange={e => setPledgeDis(e.target.value)} type='number'/>
+              <button onClick={() => {handleInputPledgeDis()}}>Max</button>
             </div>
-            <Button label="Start Now" size="small" style="primary" />
+            <Button label="Start Now" size="small" style="primary" onClick = {() => handleStakeDis()}/>
           </div>
         </div>
         <div className='migration-item-wrap d-flex migration-item-wrap-full migration-item-wrap-last'>
@@ -276,9 +419,9 @@ export default function Migration() {
         </div>
         <div className='migration-item-wrap d-flex migration-item-wrap-full migration-item-wrap-last'>
           <div className='item'>
-            <div className='name'>Cutoff block height</div>
+            <div className='name'>Cutoff block Time</div>
             <div className='value'>
-              <span>18219623</span>
+              <span>{cutOffTs}</span>
             </div>
           </div>
         </div>

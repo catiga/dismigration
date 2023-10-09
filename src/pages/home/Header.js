@@ -19,7 +19,7 @@ export default function Header(props) {
     if(currentTokenBalance) {
       setCurrentBalance(currentTokenBalance)
     }
-    if(accounts) {
+    if(accounts && accounts.length > 0) {
       setShowWallet(accounts[0].substring(0, 4) + '***' + accounts[0].substring(accounts[0].length - 4))
     }
   }, [currentTokenBalance, accounts])

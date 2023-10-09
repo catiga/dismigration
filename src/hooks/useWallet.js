@@ -50,14 +50,13 @@ export default function useWallet() {
         accounts: accounts
       });
     });
-    window.ethereum.on('disconnect', (error) => {
-      console.log('Disconnected:', error);
-      setLocal('isConnect', 0);
-      setState({
-        accounts: []
-      });
-      // Handle disconnect event as needed
-    });
+    // window.ethereum.on('disconnect', (error) => {
+    //   console.log('Disconnected:', error);
+    //   setLocal('isConnect', 0);
+    //   setState({
+    //     accounts: []
+    //   });
+    // });
 
     // return () => {
     //   window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
