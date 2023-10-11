@@ -380,7 +380,7 @@ export default function Migration() {
               <input placeholder='Pledge Quantity' value={pledgeEthf} onChange={e => setPledgeEthf(e.target.value)} type='number'/>
               <button onClick={() => {handleInputPledgeEthf()}}>Max</button>
             </div>
-            <Button label="Start Now" size="small" style={ (startTs*1000 <= Date.now() && ethfCutOffTs * 1000 > Date.now()) ? 'primary' : 'warning'} onClick = {() => handleStakeEthf()} disabled={ ethfCutOffTs * 1000 <= Date.now()}/>
+            <Button label="Start Now" size="small" style={ (startTs*1000 <= Date.now() && ethfCutOffTs * 1000 > Date.now()) ? 'primary' : 'warning'} onClick = {() => handleStakeEthf()} disabled={ startTs*1000 > Date.now() || ethfCutOffTs * 1000 <= Date.now()}/>
             {/* <Button label="Withdraw Now" size="small" style="primary" onClick = {() => handleWithdraw()}/> */}
           </div>
         </div>
@@ -398,7 +398,7 @@ export default function Migration() {
               <input placeholder='Pledge Quantity' value={pledgeDis} onChange={e => setPledgeDis(e.target.value)} type='number'/>
               <button onClick={() => {handleInputPledgeDis()}}>Max</button>
             </div>
-            <Button label="Start Now" size="small" style={ (startTs*1000 <= Date.now() && ethfCutOffTs * 1000 > Date.now()) ? 'primary' : 'warning'} onClick = {() => handleStakeDis()} disabled={ ethfCutOffTs * 1000 <= Date.now()}/>
+            <Button label="Start Now" size="small" style={ (startTs*1000 <= Date.now() && ethfCutOffTs * 1000 > Date.now()) ? 'primary' : 'warning'} onClick = {() => handleStakeDis()} disabled={ startTs*1000 > Date.now() || ethfCutOffTs * 1000 <= Date.now()}/>
           </div>
         </div>
         <div className='migration-item-wrap d-flex migration-item-wrap-full migration-item-wrap-last'>
