@@ -101,21 +101,33 @@ export default function Migration() {
     setDisTotal(disTotalSupply)
   }
 
+  const truncateBigNumber = (bigNum, decimalPlaces) => {
+    let str = bigNum + '';
+    const index = str.indexOf('.');
+    if (index === -1) {
+        return bigNum;
+    }
+    str = str.slice(0, index + decimalPlaces + 1);
+    return str;
+};
+
   const handleInputPledgeEthf = async() => {
     const gasPrice = '15000000000000000'
     if(BigNumber.from(ethfBalance) <= BigNumber.from(gasPrice)) {
      return 
     }
-    const loadBal = ((BigNumber.from(ethfBalance) - BigNumber.from(gasPrice)) / BigNumber.from(dec)).toFixed(4)
-    setPledgeEthf(loadBal)
+    const loadBal = ((BigNumber.from(ethfBalance) - BigNumber.from(gasPrice)) / BigNumber.from(dec))//.toFixed(4)
+    // setPledgeEthf(loadBal)
+    setPledgeDis(truncateBigNumber(loadBal, 4))
   }
 
   const handleInputPledgeDis = async() => {
     if(BigNumber.from(disBalance) == BigNumber.from(0)) {
      return 
     }
-    const loadBal = ((BigNumber.from(disBalance)) / BigNumber.from(dec)).toFixed(4)
-    setPledgeDis(loadBal)
+    const loadBal = ((BigNumber.from(disBalance)) / BigNumber.from(dec))//.toFixed(4)
+
+    setPledgeDis(truncateBigNumber(loadBal, 4))
   }
 
   const handleStakeEthf = async () => {
