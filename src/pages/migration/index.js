@@ -42,6 +42,12 @@ export default function Migration() {
 
   const [ethfCutOffTs, setEthfCutOffTs] = useState(0)
 
+  const numberWithCommas = (x) => {
+    const parts = x.toString().split(".");
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return parts.join(".");
+  }
+
   const handleBalance = async (account) => {
     // const web3Ethf = new Web3(new Web3.providers.HttpProvider(ethfRpcProvider));
     // const web3Bsc = new Web3(new Web3.providers.HttpProvider(bscRpcProvider));
@@ -334,11 +340,11 @@ export default function Migration() {
       <div className='d-flex'>
         <div className='migration-data'>
           <div className='name'>ETHF migration value</div>
-          <div className='value'>{ (BigNumber.from(ethfTotal) / BigNumber.from(dec)).toFixed(4) }</div>
+          <div className='value'>{ numberWithCommas((BigNumber.from(ethfTotal) / BigNumber.from(dec)).toFixed(4)) }</div>
         </div>
         <div className='migration-data'>
           <div className='name'>DIS Token migration value</div>
-          <div className='value'>{ (BigNumber.from(disTotal) / BigNumber.from(dec)).toFixed(4) }</div>
+          <div className='value'>{ numberWithCommas((BigNumber.from(disTotal) / BigNumber.from(dec)).toFixed(4)) }</div>
         </div>
         <div className='migration-data'>
           <div className='name'>Rewards of token migration DIS/ETHF (day)*</div>
