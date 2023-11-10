@@ -119,12 +119,13 @@ export default function Migration() {
 
   const handleInputPledgeEthf = async() => {
     const gasPrice = '15000000000000000'
-    if(BigNumber.from(ethfBalance) <= BigNumber.from(gasPrice)) {
+    if(BigNumber.from(ethfBalance).lte(BigNumber.from(gasPrice))) {
      return 
     }
     const loadBal = ((BigNumber.from(ethfBalance) - BigNumber.from(gasPrice)) / BigNumber.from(dec))//.toFixed(4)
+    console.log('huoqubalance:', loadBal, truncateBigNumber(loadBal, 4))
     // setPledgeEthf(loadBal)
-    setPledgeDis(truncateBigNumber(loadBal, 4))
+    setPledgeEthf(truncateBigNumber(loadBal, 4))
   }
 
   const handleInputPledgeDis = async() => {
