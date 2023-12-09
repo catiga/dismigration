@@ -15,6 +15,7 @@ const ethfRpcProvider = "https://rpc.etherfair.org"
 const bscRpcProvider = "https://bsc-dataseed3.ninicoin.io"
 const dec = "1000000000000000000"
 const disAddress = '0xe2EcC66E14eFa96E9c55945f79564f468882D24C'
+const startTs = 1697040000
 
 const web3Ethf = new Web3(new Web3.providers.HttpProvider(ethfRpcProvider));
 const web3Bsc = new Web3(new Web3.providers.HttpProvider(bscRpcProvider));
@@ -40,6 +41,12 @@ export default function Migration() {
   const [pledgeDis, setPledgeDis] = useState('')
 
   const [ethfCutOffTs, setEthfCutOffTs] = useState(0)
+
+  const numberWithCommas = (x) => {
+    const parts = x.toString().split(".");
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return parts.join(".");
+  }
 
   const handleBalance = async (account) => {
     // const web3Ethf = new Web3(new Web3.providers.HttpProvider(ethfRpcProvider));
@@ -94,31 +101,40 @@ export default function Migration() {
     const endTs = await ethfLocker.methods.offBlockTs().call()
     setEthfCutOffTs(Number(endTs))
 
-    // const date = new Date(Number(endTs) * 1000);  // 将秒时间戳转换为毫秒
-    // const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-    // setEthfCutOffTs(formattedDate)
-
     const chainLockerDis = selectChain(56)
     const disLocker = new web3Bsc.eth.Contract(chainLockerDis.abi, chainLockerDis.address)
     const disTotalSupply = await disLocker.methods.totalSupply().call()
     setDisTotal(disTotalSupply)
   }
 
+  const truncateBigNumber = (bigNum, decimalPlaces) => {
+    let str = bigNum + '';
+    const index = str.indexOf('.');
+    if (index === -1) {
+        return bigNum;
+    }
+    str = str.slice(0, index + decimalPlaces + 1);
+    return str;
+};
+
   const handleInputPledgeEthf = async() => {
     const gasPrice = '15000000000000000'
-    if(BigNumber.from(ethfBalance) <= BigNumber.from(gasPrice)) {
+    if(BigNumber.from(ethfBalance).lte(BigNumber.from(gasPrice))) {
      return 
     }
-    const loadBal = ((BigNumber.from(ethfBalance) - BigNumber.from(gasPrice)) / BigNumber.from(dec)).toFixed(4)
-    setPledgeEthf(loadBal)
+    const loadBal = ((BigNumber.from(ethfBalance) - BigNumber.from(gasPrice)) / BigNumber.from(dec))//.toFixed(4)
+    console.log('huoqubalance:', loadBal, truncateBigNumber(loadBal, 4))
+    // setPledgeEthf(loadBal)
+    setPledgeEthf(truncateBigNumber(loadBal, 4))
   }
 
   const handleInputPledgeDis = async() => {
     if(BigNumber.from(disBalance) == BigNumber.from(0)) {
      return 
     }
-    const loadBal = ((BigNumber.from(disBalance)) / BigNumber.from(dec)).toFixed(4)
-    setPledgeDis(loadBal)
+    const loadBal = ((BigNumber.from(disBalance)) / BigNumber.from(dec))//.toFixed(4)
+
+    setPledgeDis(truncateBigNumber(loadBal, 4))
   }
 
   const handleStakeEthf = async () => {
@@ -325,11 +341,11 @@ export default function Migration() {
       <div className='d-flex'>
         <div className='migration-data'>
           <div className='name'>ETHF migration value</div>
-          <div className='value'>{ (BigNumber.from(ethfTotal) / BigNumber.from(dec)).toFixed(4) }</div>
+          <div className='value'>{ numberWithCommas((BigNumber.from(ethfTotal) / BigNumber.from(dec)).toFixed(4)) }</div>
         </div>
         <div className='migration-data'>
           <div className='name'>DIS Token migration value</div>
-          <div className='value'>{ (BigNumber.from(disTotal) / BigNumber.from(dec)).toFixed(4) }</div>
+          <div className='value'>{ numberWithCommas((BigNumber.from(disTotal) / BigNumber.from(dec)).toFixed(4)) }</div>
         </div>
         <div className='migration-data'>
           <div className='name'>Rewards of token migration DIS/ETHF (day)*</div>
@@ -383,7 +399,7 @@ export default function Migration() {
               <input placeholder='Pledge Quantity' value={pledgeEthf} onChange={e => setPledgeEthf(e.target.value)} type='number'/>
               <button onClick={() => {handleInputPledgeEthf()}}>Max</button>
             </div>
-            <Button label="Start Now" size="small" style={ ethfCutOffTs * 1000 > Date.now() ? 'primary' : 'warning'} onClick = {() => handleStakeEthf()} disabled={ ethfCutOffTs * 1000 <= Date.now()}/>
+            <Button label="Start Now" size="small" style={ (startTs*1000 <= Date.now() && ethfCutOffTs * 1000 > Date.now()) ? 'primary' : 'warning'} onClick = {() => handleStakeEthf()} disabled={ startTs*1000 > Date.now() || ethfCutOffTs * 1000 <= Date.now()}/>
             {/* <Button label="Withdraw Now" size="small" style="primary" onClick = {() => handleWithdraw()}/> */}
           </div>
         </div>
@@ -401,12 +417,12 @@ export default function Migration() {
               <input placeholder='Pledge Quantity' value={pledgeDis} onChange={e => setPledgeDis(e.target.value)} type='number'/>
               <button onClick={() => {handleInputPledgeDis()}}>Max</button>
             </div>
-            <Button label="Start Now" size="small" style="primary" onClick = {() => handleStakeDis()}/>
+            <Button label="Start Now" size="small" style={ (startTs*1000 <= Date.now() && ethfCutOffTs * 1000 > Date.now()) ? 'primary' : 'warning'} onClick = {() => handleStakeDis()} disabled={ startTs*1000 > Date.now() || ethfCutOffTs * 1000 <= Date.now()}/>
           </div>
         </div>
         <div className='migration-item-wrap d-flex migration-item-wrap-full migration-item-wrap-last'>
           <div className='item'>
-            <div className='name'>Claimable ETHF</div>
+            <div className='name'>Claimable DisChain(DIS)</div>
             <div className='value'>
               <span className='color-blue'>0</span>
               <span>$0</span>
@@ -421,7 +437,7 @@ export default function Migration() {
           <div className='item'>
             <div className='name'>Cutoff block Time</div>
             <div className='value'>
-              <span>{ new Date(ethfCutOffTs * 1000).toLocaleDateString() + ' ' + new Date(ethfCutOffTs * 1000).toLocaleTimeString() }</span>
+              <span>{ (ethfCutOffTs == 0 || startTs * 1000 > Date.now()) ? 'Waiting' : new Date(ethfCutOffTs * 1000).toLocaleDateString() + ' ' + new Date(ethfCutOffTs * 1000).toLocaleTimeString() }</span>
             </div>
           </div>
         </div>
