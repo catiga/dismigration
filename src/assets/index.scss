@@ -1,4 +1,6 @@
 @import './theme.scss';
+@import './tailwind.scss';
+@import './font.scss';
 html, body {
   background-color: transparent;
   font-family: $font-family;

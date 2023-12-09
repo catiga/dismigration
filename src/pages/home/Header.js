@@ -57,7 +57,7 @@ const HeaderContanier = styled.div`
   left: 0;
   right: 0;
   top: 0;
-  z-index: 2;
+  z-index: 99;
   border-bottom: 1px solid #F2F2F2;
   .header-content{
     display: flex;

@@ -1,8 +1,15 @@
 import { lazy } from 'react'
 const routes = [
   {
-    name: 'Home',
+    name: 'Index',
     path: '/',
+    ico:'index',
+    exact:true,
+    compontent: lazy(() => import('./pages/index/index'))
+  },
+  {
+    name: 'Home',
+    path: '/home',
     ico:'home',
     exact:true,
     compontent: lazy(() => import('./pages/home/index'))
