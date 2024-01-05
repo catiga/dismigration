@@ -20,7 +20,14 @@ const routes = [
     ico:'home',
     exact:true,
     compontent: lazy(() => import('./pages/migration/index'))
-  }
+  },
+  {
+    name: 'Migration',
+    path: '/migration/start',
+    ico:'home',
+    exact:true,
+    compontent: lazy(() => import('./pages/migration/migration'))
+  },
 ]
 export default routes
 

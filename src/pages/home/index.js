@@ -34,7 +34,7 @@ export default function Home() {
         </div>
 
         <div className="buttom-button-wrap">
-          <Link to="/migration"><Button label="Migration  Now" size="large" /></Link>
+          <Link to="/migration/start"><Button label="Migration  Now" size="large" /></Link>
         </div>
       </div>
     </div>

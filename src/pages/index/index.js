@@ -23,9 +23,25 @@ import PARTNER02 from '../../assets/images/logo/logo-coolwallet.svg'
 import PARTNER03 from '../../assets/images/logo/logo-onekey.svg'
 import PARTNER04 from '../../assets/images/logo/logo-tokenpocket.png'
 
+import BANNER from '../../assets/images/bg-banner.webp'
+
 export default function Index() {
     return (
         <IndexContainer>
+            {/* banner01 */}
+            <div className="banner-box">
+                <img className="bg" src={BANNER} />
+                <div className="title-box">
+                    <h1 className="title font-cs">Disney (DIS)  Crypto Currency</h1>
+                    <div className="p">
+                        <p className=" font-cr">DIS was launched by Miningtw Technology Co., Ltd., a cooperation</p>
+                        <p className=" font-cr">team located in Hong Kong and Taiwan.</p>
+                        <Link to="/home">
+                            <button className="bg-white text-black mt-8 px-6 py-2 font-cm text-xl rounded-sm">Get Start</button>
+                        </Link>
+                    </div>
+                </div>
+            </div>
             {/* banner */}
             <div className="section01 px-4 lg:px-40">
                 <div className="flex flex-col lg:flex-row items-start justify-between gap-x-8 relative z-[2] lg:w-full">
@@ -138,6 +154,38 @@ const IndexContainer = styled.div`
         top: 50%;
     }
 
+    .banner-box {
+        height: calc(100vh - 72px);
+        position: relative;
+        overflow: hidden;
+        background: radial-gradient(circle at 450px 50%, #002353, #000921 450px);
+        .bg {
+            position: absolute;
+            width: 68%;
+            max-width: 1100px;
+            display: block;
+            top: 56%;
+            left: 0;
+            transform: translateY(-50%);
+        }
+        .title-box {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            width: 36%;
+            display: flex;
+            flex-direction: column;
+            h1 {
+                font-size: 42px;
+            }
+            .p {
+                margin-top: 30px;
+            }
+        }
+    }
+
     .section01 {
         height: 100vh;
         background-color: #1559ed;
@@ -146,6 +194,7 @@ const IndexContainer = styled.div`
         align-items: center;
         justify-content: center;
         position: relative;
+        display: none;
     }
 
     .section02 {
