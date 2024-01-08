@@ -26,17 +26,13 @@ export default function Header(props) {
   return (
     <HeaderContanier>
       <div className="header-content">
-        <div className="header-left font-cs">
+        <div className="header-left font-cm">
           <a href='/'>
             <img className='logo' src={homeIcon} alt="" />
           </a>
           <Link to="/migration/start">
-            <p className='shake font-cm'>
-              <span className="n">st</span>
-              <span className="e">a</span>
-              <span className="o">k</span>
-              <span className="n2">e</span>
-            </p> 
+            {/* <h1 className='stake' data-shadow='stake'>stake</h1> */}
+            <p className='stake' data-text="stake"> stake </p>
           </Link>
 
         </div>
@@ -84,47 +80,42 @@ const HeaderContanier = styled.div`
     margin-left: 20px;
     display: flex;
     align-items: center;
+    gap: 30px;
     .logo {
       width: 130px;
     }
 
-    .shake {
-      font-size: 22px;
-      cursor: pointer;
-      text-decoration: underline;
-      color: #999;
-      margin-left: 30px;
-      span {
-        animation: flicker 5s linear infinite;
-        animation-delay: .2s;
-        &.e {
-          animation-delay: .7s;
-        }
-        &.o {
-          animation-delay: 1s;
-        }
-        &.n2 {
-          animation-delay: 1.5s;
-        }
+    .stake {
+      position: relative;
+      margin: 6px auto 0;
+      font-size: 18px;
+      word-spacing: 2px;
+      display: inline-block;
+      line-height: 1;
+      white-space: nowrap;
+      color: transparent;
+      background-color: #1868dc;
+      background-clip: text;
+      &::after {
+        content: attr(data-text);
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 5;
+        background-image: linear-gradient(120deg, transparent 0%, transparent 10px, white 20px, transparent 22px, transparent 30px, rgba(255, 255, 255, 0.3) 40px, transparent 50px, transparent 55px, rgba(255, 255, 255, 0.6) 32rem, white 60px, rgba(255, 255, 255, 0.3) 33.15rem, transparent 70px, transparent 80px, rgba(255, 255, 255, 0.3) 90px, transparent 100px, transparent 100%);
+        background-clip: text;
+        background-size: 150% 100%;
+        background-repeat: no-repeat;
+        animation: shine 2s infinite linear;
       }
-
-      @keyframes flicker {
+      @keyframes shine {
         0% {
-          color: #333;
+          background-position: 50% 0;
         }
-        5%,
-        15%,
-        25%,
-        30%,
         100% {
-          color: #fff;
-          text-shadow: 0px 0px 5px #42fff6, 0px 0px 10px #42fff6, 0px 0px 20px #42fff6,
-            0px 0px 50px #42fff6;
-        }
-        10%,
-        20% {
-          color: #333;
-          text-shadow: none;
+          background-position: -190% 0;
         }
       }
     }

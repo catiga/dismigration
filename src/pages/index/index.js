@@ -1,4 +1,5 @@
 import styled from "styled-components"
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom'
 import BGL from '../../assets/images/bg-l.png'
 import BANNERPIC from '../../assets/images/pic-banner.png'
@@ -25,6 +26,7 @@ import PARTNER04 from '../../assets/images/logo/logo-tokenpocket.png'
 
 import BANNER from '../../assets/images/bg-banner.webp'
 
+
 export default function Index() {
     return (
         <IndexContainer>
@@ -37,7 +39,14 @@ export default function Index() {
                         <p className=" font-cr">DIS was launched by Miningtw Technology Co., Ltd., a cooperation</p>
                         <p className=" font-cr">team located in Hong Kong and Taiwan.</p>
                         <Link to="/home">
-                            <button className="bg-white text-black mt-8 px-6 py-2 font-cm text-xl rounded-sm">Get Start</button>
+                            <div className="swipe-box mt-3">
+                                <ul className="flip3"> 
+                                    <li className="text-xl font-cm">coming soon.</li>
+                                    <li className="text-xl font-cm">announcement</li>
+                                    <li className="text-xl font-cm">Block height</li>
+                                </ul>
+                            </div>
+                            {/* <button className="bg-white text-black mt-8 px-6 py-2 font-cm text-xl rounded-sm">Get Start</button> */}
                         </Link>
                     </div>
                 </div>
@@ -183,6 +192,62 @@ const IndexContainer = styled.div`
             .p {
                 margin-top: 30px;
             }
+
+            .swipe-box{
+                overflow: hidden;
+                position: relative;
+                height: 42px;
+                display: inline-block;
+                background: white;
+                padding: 5px 20px 0;
+                border-radius: 20px 0 20px 0;
+                li {
+                    color: black;
+                    font-weight: 700;
+                    padding: 0 10px;
+                    height: 45px;
+                    margin-bottom: 45px;
+                    display: block;
+                    text-align: center;
+                }
+            }
+            .flip2 { animation: flip2 6s cubic-bezier(0.23, 1, 0.32, 1.2) infinite; }
+            .flip3 { animation: flip3 8s cubic-bezier(0.23, 1, 0.32, 1.2) infinite; }
+            .flip4 { animation: flip4 10s cubic-bezier(0.23, 1, 0.32, 1.2) infinite; }
+
+            @keyframes flip2 {
+                0% { margin-top: -180px; }
+                5% { margin-top: -90px;  }
+                50% { margin-top: -90px; }
+                55% { margin-top: 0px; }
+                99.99% { margin-top: 0px; }
+                100% { margin-top: -270px; }
+            }
+
+            @keyframes flip3 {
+                0% { margin-top: -270px; }
+                5% { margin-top: -180px; }
+                33% { margin-top: -180px; }
+                38% { margin-top: -90px; }
+                66% { margin-top: -90px; }
+                71% { margin-top: 0px; }
+                99.99% { margin-top: 0px; }
+                100% { margin-top: -270px; }
+            }
+
+            @keyframes flip4 {
+                0% { margin-top: -360px; }
+                5% { margin-top: -270px; }
+                25% { margin-top: -270px; }
+                30% { margin-top: -180px; }
+                50% { margin-top: -180px; }
+                55% { margin-top: -90px; }
+                75% { margin-top: -90px; }
+                80% { margin-top: 0px; }
+                99.99% { margin-top: 0px; }
+                100% { margin-top: -270px; }
+            }
+
         }
     }
 
