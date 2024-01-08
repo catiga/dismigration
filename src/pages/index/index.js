@@ -143,7 +143,7 @@ export default function Index() {
 }
 
 const IndexContainer = styled.div`
-    padding-top: 72px;
+    padding-top: 62px;
     min-height: 100vh;
     box-sizing: border-box;
     position: relative;
@@ -158,7 +158,7 @@ const IndexContainer = styled.div`
         height: calc(100vh - 72px);
         position: relative;
         overflow: hidden;
-        background: radial-gradient(circle at 450px 50%, #002353, #000921 450px);
+        background: radial-gradient(circle at 20% 70%, #002353, #000921 450px);
         .bg {
             position: absolute;
             width: 68%;

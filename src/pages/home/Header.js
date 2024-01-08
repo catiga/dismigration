@@ -6,8 +6,8 @@ import useGlobal from "../../hooks/useGlobal";
 import useWallet from "../../hooks/useWallet";
 import { getLocal } from "../../utils"
 import { useEffect, useState } from "react";
+import { Link } from 'react-router-dom'
 import Button from '../../component/Button';
-
 
 export default function Header(props) {
   const { accounts, currentTokenBalance } = useGlobal()
@@ -16,31 +16,40 @@ export default function Header(props) {
   const [currentBalance, setCurrentBalance] = useState()
   const [showWallet, setShowWallet] = useState('')
   useEffect(() => {
-    if(currentTokenBalance) {
+    if (currentTokenBalance) {
       setCurrentBalance(currentTokenBalance)
     }
-    if(accounts && accounts.length > 0) {
+    if (accounts && accounts.length > 0) {
       setShowWallet(accounts[0].substring(0, 4) + '***' + accounts[0].substring(accounts[0].length - 4))
     }
   }, [currentTokenBalance, accounts])
   return (
     <HeaderContanier>
       <div className="header-content">
-        <div className="header-left">
+        <div className="header-left font-cs">
           <a href='/'>
-            <img src={homeIcon} alt="" />
+            <img className='logo' src={homeIcon} alt="" />
           </a>
+          <Link to="/migration/start">
+            <p className='shake font-cm'>
+              <span className="n">st</span>
+              <span className="e">a</span>
+              <span className="o">k</span>
+              <span className="n2">e</span>
+            </p> 
+          </Link>
+
         </div>
         {
           (!accounts && !getLocal('account')) && <ConnectButton />
         }
-        
+
         {
           (accounts || getLocal('account')) &&
           <div className='header-top-info'>
             {
               chainId !== 513100 || (!accounts || !getLocal('account')) &&
-              <ErrorNetwork handleChangeNetwork={handleChangeNetwork}/>
+              <ErrorNetwork handleChangeNetwork={handleChangeNetwork} />
             }
             <div>
               <Button label={showWallet}></Button>
@@ -64,28 +73,75 @@ const HeaderContanier = styled.div`
     justify-content: space-between;
     align-items: center;
     margin: 0 auto;
-    height: 72px;
+    height: 62px;
     margin: 0 auto;
     max-width: 1400px;
   }
   .right-contanier {
     display: none
   }
- .header-left{
-  margin-left: 20px;
- }
- .header-right {
-  flex: 1;
-  margin-left: 20px;
-  li {
-    cursor: pointer;
+  .header-left{
+    margin-left: 20px;
+    display: flex;
+    align-items: center;
+    .logo {
+      width: 130px;
+    }
+
+    .shake {
+      font-size: 22px;
+      cursor: pointer;
+      text-decoration: underline;
+      color: #999;
+      margin-left: 30px;
+      span {
+        animation: flicker 5s linear infinite;
+        animation-delay: .2s;
+        &.e {
+          animation-delay: .7s;
+        }
+        &.o {
+          animation-delay: 1s;
+        }
+        &.n2 {
+          animation-delay: 1.5s;
+        }
+      }
+
+      @keyframes flicker {
+        0% {
+          color: #333;
+        }
+        5%,
+        15%,
+        25%,
+        30%,
+        100% {
+          color: #fff;
+          text-shadow: 0px 0px 5px #42fff6, 0px 0px 10px #42fff6, 0px 0px 20px #42fff6,
+            0px 0px 50px #42fff6;
+        }
+        10%,
+        20% {
+          color: #333;
+          text-shadow: none;
+        }
+      }
+    }
+
   }
- }
- .header-content {
-  .icon-client {
-    width: 137px;
-    height: 30px;
-   }
- }
+  .header-right {
+    flex: 1;
+    margin-left: 20px;
+    li {
+      cursor: pointer;
+    }
+  }
+  .header-content {
+    .icon-client {
+      width: 137px;
+      height: 30px;
+    }
+  }
 
 `
