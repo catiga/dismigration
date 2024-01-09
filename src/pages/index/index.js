@@ -164,7 +164,7 @@ const IndexContainer = styled.div`
     }
 
     .banner-box {
-        height: calc(100vh - 72px);
+        height: calc(100vh - 62px);
         position: relative;
         overflow: hidden;
         background: radial-gradient(circle at 20% 70%, #002353, #000921 450px);
