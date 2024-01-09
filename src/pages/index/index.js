@@ -34,16 +34,16 @@ export default function Index() {
             <div className="banner-box">
                 <img className="bg" src={BANNER} />
                 <div className="title-box">
-                    <h1 className="title font-cs">Disney (DIS)  Crypto Currency</h1>
+                    <h1 className="title font-cs">Disney (DIS)  Chain</h1>
                     <div className="p">
-                        <p className=" font-cr">DIS was launched by Miningtw Technology Co., Ltd., a cooperation</p>
-                        <p className=" font-cr">team located in Hong Kong and Taiwan.</p>
+                        <p className=" font-cr">Anticipate the opportunity for potential pledge rewards as DIS Chain's Mainnet launches. Will disclose the block height that initiates the mining activity.</p>
+                        <p className=" font-cr">Keep an eye out for this chance to engage with and potentially benefit from the core of our blockchain network.</p>
                         <Link to="/home">
                             <div className="swipe-box mt-3">
                                 <ul className="flip3"> 
-                                    <li className="text-xl font-cm">coming soon.</li>
-                                    <li className="text-xl font-cm">announcement</li>
-                                    <li className="text-xl font-cm">Block height</li>
+                                    <li className="text-xl font-cm">Coming soon</li>
+                                    <li className="text-xl font-cm">Current Block: </li>
+                                    <li className="text-xl font-cm">Until Block: ?</li>
                                 </ul>
                             </div>
                             {/* <button className="bg-white text-black mt-8 px-6 py-2 font-cm text-xl rounded-sm">Get Start</button> */}
