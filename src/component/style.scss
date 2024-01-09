@@ -95,6 +95,11 @@
   font-size: 30px;
   padding: 19px 51px;
 }
+.button-small {
+  border-radius: 40px;
+  font-size: 14px;
+  padding: 7px 16px;
+}
 @keyframes scale{
   0%{
     transform: scaleY(0);

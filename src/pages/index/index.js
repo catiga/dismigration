@@ -25,9 +25,38 @@ import PARTNER03 from '../../assets/images/logo/logo-onekey.svg'
 import PARTNER04 from '../../assets/images/logo/logo-tokenpocket.png'
 
 import BANNER from '../../assets/images/bg-banner.webp'
-
+import Web3 from 'web3';
 
 export default function Index() {
+    const [blockNumber, setBlockNumber] = useState(null);
+
+    useEffect(() => {
+        const ethRpcProvider = 'https://rpc.etherfair.org';
+        const web3 = new Web3(new Web3.providers.HttpProvider(ethRpcProvider));
+
+        const fetchBlockNumber = async () => {
+            try {
+                // 进行网络请求
+                const number = await web3.eth.getBlockNumber();
+
+                // 更新状态
+                setBlockNumber(number.toString());
+
+            } catch (error) {
+                console.error('获取区块高度时出错:', error);
+            }
+        };
+
+        // 初始加载一次
+        fetchBlockNumber();
+
+        // 使用 setInterval 每秒更新一次区块高度
+        const intervalId = setInterval(fetchBlockNumber, 2000);
+
+        // 组件卸载时清除 interval
+        return () => clearInterval(intervalId);
+    }, []); // 空数组作为第二个参数，确保 useEffect 只执行一次
+
     return (
         <IndexContainer>
             {/* banner01 */}
@@ -36,19 +65,21 @@ export default function Index() {
                 <div className="title-box">
                     <h1 className="title font-cs">Disney (DIS)  Chain</h1>
                     <div className="p">
-                        <p className=" font-cr">Anticipate the opportunity for potential pledge rewards as DIS Chain's Mainnet launches. Will disclose the block height that initiates the mining activity.</p>
-                        <p className=" font-cr">Keep an eye out for this chance to engage with and potentially benefit from the core of our blockchain network.</p>
+                        <p className="des">Anticipate the opportunity for potential pledge rewards as DIS Chain's Mainnet launches. Will disclose the block height that initiates the mining activity.</p>
+                        <p className="des">Keep an eye out for this chance to engage with and potentially benefit from the core of our blockchain network.</p>
                         <Link to="/home">
-                            <div className="swipe-box mt-3">
-                                <ul className="flip3"> 
-                                    <li className="text-xl font-cm">Coming soon</li>
-                                    <li className="text-xl font-cm">Current Block: </li>
+                            <div className="swipe-box mt-12">
+                                <ul className="flip2">
+                                    <li className="text-xl font-cm">Current Block: {blockNumber !== null ? blockNumber : 'Loading...'}</li>
                                     <li className="text-xl font-cm">Until Block: ?</li>
                                 </ul>
                             </div>
                             {/* <button className="bg-white text-black mt-8 px-6 py-2 font-cm text-xl rounded-sm">Get Start</button> */}
                         </Link>
                     </div>
+                    {/* <div className="line"></div>
+                    <div className="line"></div>
+                    <div className="line"></div> */}
                 </div>
             </div>
             {/* banner */}
@@ -109,7 +140,7 @@ export default function Index() {
                 <img className="absolute right-0 w-[20rem] top-0" src={SECTION03} />
             </div>
             {/* section04 */}
-            <div className="section04 px-4 lg:px-40 py-20 text-center flex flex-col lg:flex-row items-center"> 
+            <div className="section04 px-4 lg:px-40 py-20 text-center flex flex-col lg:flex-row items-center">
                 <div className="flex-1">
                     <h1 className="text-4xl font-cs tracking-wider">Community</h1>
                     <p className="text-xl font-cm py-3 text-[#6f7174] w-">Collaborations with social platforms like Linkenetwork, DeNet, promoting DIS Chain on social media.</p>
@@ -143,7 +174,7 @@ export default function Index() {
             {/* footer */}
             <footer className="footer px-4 lg:px-40 py-8">
                 <div className="py-20 font-cm text-base">
-                    
+
                 </div>
                 <p className="text-md font-cr text-center">All Rights Reserved @dis | <a href="https://whitepaper.dischain.xyz" target="_blank" className="ml-2 font-cm underline">white paper</a></p>
             </footer>
@@ -168,9 +199,19 @@ const IndexContainer = styled.div`
         position: relative;
         overflow: hidden;
         background: radial-gradient(circle at 20% 70%, #002353, #000921 450px);
+        &::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1;
+        }
         .bg {
             position: absolute;
-            width: 68%;
+            width: 90%;
             max-width: 1100px;
             display: block;
             top: 56%;
@@ -179,18 +220,42 @@ const IndexContainer = styled.div`
         }
         .title-box {
             position: absolute;
-            right: 0;
-            top: 50%;
-            transform: translateY(-50%);
+            left: 50%;
+            top: 45%;
+            transform: translate(-50%, -50%);
             color: white;
-            width: 36%;
+            width: 66%;
             display: flex;
             flex-direction: column;
+            z-index: 2;
             h1 {
                 font-size: 42px;
             }
             .p {
                 margin-top: 30px;
+                .des {
+                    // letter-spacing: 4px;
+                }
+            }
+
+            .line {
+                width: 100vw;
+                height: 1px;
+                background: white;
+                position: absolute;
+                top: -50%;
+                left: -54rem;
+                transform: rotate(-45deg);
+                &:nth-of-type(2) {
+                    top: 20rem;
+                    left: 20rem;
+                    transform: rotate(-45deg);
+                }
+                &:nth-of-type(3) {
+                    top: 20rem;
+                    left: 20rem;
+                    transform: rotate(-20deg);
+                }
             }
 
             .swipe-box{
@@ -211,7 +276,7 @@ const IndexContainer = styled.div`
                     text-align: center;
                 }
             }
-            .flip2 { animation: flip2 6s cubic-bezier(0.23, 1, 0.32, 1.2) infinite; }
+            .flip2 { animation: flip2 8s cubic-bezier(0.23, 1, 0.32, 1.2) infinite; }
             .flip3 { animation: flip3 8s cubic-bezier(0.23, 1, 0.32, 1.2) infinite; }
             .flip4 { animation: flip4 10s cubic-bezier(0.23, 1, 0.32, 1.2) infinite; }
 
