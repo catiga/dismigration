@@ -7,7 +7,7 @@ import useGlobal from "../../hooks/useGlobal";
 import useWallet from "../../hooks/useWallet";
 import { getLocal } from "../../utils"
 import { useEffect, useState } from "react";
-import { Link } from 'react-router-dom'
+import { Link, useLocation, useHistory } from 'react-router-dom'
 import Button from '../../component/Button';
 
 export default function Header(props) {
@@ -16,6 +16,8 @@ export default function Header(props) {
   const { handleChangeNetwork } = props
   const [currentBalance, setCurrentBalance] = useState()
   const [showWallet, setShowWallet] = useState('')
+  const location = useLocation();
+  const history = useHistory();
   useEffect(() => {
     if (currentTokenBalance) {
       setCurrentBalance(currentTokenBalance)
@@ -24,6 +26,19 @@ export default function Header(props) {
       setShowWallet(accounts[0].substring(0, 4) + '***' + accounts[0].substring(accounts[0].length - 4))
     }
   }, [currentTokenBalance, accounts])
+
+
+  const handleGotoView = (name) => {
+    if (location.pathname !== '/') {
+      history.push('/#' + name);
+      return;
+    }
+    document.getElementById(name).scrollIntoView({
+      behavior: 'smooth',
+      block: 'center'
+    })
+  }
+  
   return (
     <HeaderContanier>
       <div className="header-content">
@@ -35,15 +50,9 @@ export default function Header(props) {
         </div>
          
         <div className='header-right'>
-          <Link to="/migration/start">
-            <p className='nav'>Info</p>
-          </Link>
-          <Link to="/migration/start">
-            <p className='nav'>Community</p>
-          </Link>
-          <Link to="/migration/start">
-            <p className='nav'>Partners</p>
-          </Link>
+          <p className='nav' onClick={() => handleGotoView('info')}>Info</p>
+          <p className='nav' onClick={() => handleGotoView('community')}>Community</p>
+          <p className='nav' onClick={() => handleGotoView('partners')}>Partners</p>
           <Link to="/migration/start">
             <p className='stake' data-text="Pledge">Pledge</p>
           </Link>
@@ -118,6 +127,7 @@ const HeaderContanier = styled.div`
     }
     .nav {
       text-decoration: underline;
+      cursor: pointer;
     }
 
     .stake {

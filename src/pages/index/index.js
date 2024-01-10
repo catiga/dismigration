@@ -110,7 +110,7 @@ export default function Index() {
                 <img className="absolute left-0 w-[20rem] top-0" src={BGPIC02R} />
             </div>
             {/* section03 */}
-            <div className="section03 px-4 lg:px-40 py-20 relative overflow-hidden">
+            <div id="info" className="section03 px-4 lg:px-40 py-20 relative overflow-hidden">
                 <div className="relative z-[2]">
                     <h1 className="text-4xl font-cs tracking-wider text-center">DIS Chain - The Blockchain Innovation from Meme to AI Integration, Realizing True WEB3</h1>
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-12 text-white">
@@ -140,7 +140,7 @@ export default function Index() {
                 <img className="absolute right-0 w-[20rem] top-0" src={SECTION03} />
             </div>
             {/* section04 */}
-            <div className="section04 px-4 lg:px-40 py-20 text-center flex flex-col lg:flex-row items-center">
+            <div id="community" className="section04 px-4 lg:px-40 py-20 text-center flex flex-col lg:flex-row items-center">
                 <div className="flex-1">
                     <h1 className="text-4xl font-cs tracking-wider">Community</h1>
                     <p className="text-xl font-cm py-3 text-[#6f7174] w-">Collaborations with social platforms like Linkenetwork, DeNet, promoting DIS Chain on social media.</p>
@@ -162,7 +162,7 @@ export default function Index() {
                 <img className="w-[28rem] mt-12 lg:mt-0" src={COMMUNITY} />
             </div>
             {/* 合作伙伴儿 */}
-            <div className="section05 px-4 lg:px-40 py-20 text-center">
+            <div id="partners" className="section05 px-4 lg:px-40 py-20 text-center">
                 <h1 className="text-4xl text-white font-cs tracking-wider">Partners</h1>
                 <div className="flex items-center justify-center gap-8 mt-8">
                     <img className="h-10" src={PARTNER01} />

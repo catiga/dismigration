@@ -376,14 +376,14 @@ export default function Migration() {
                   <legend>Migration</legend>
                   <div className='input-box flex items-center'>
                     <input placeholder='Pledge Quantity' value={pledgeDis} onChange={e => setPledgeDis(e.target.value)}  type='number' />
-                    <button className='button-max'>max</button>
+                    <button disabled className='button-max'>max</button>
                   </div>
                   <h3 className='mt-4'>Balance: {(BigNumber.from(disBalance) / BigNumber.from(dec)).toFixed(4)} DIS</h3>
                 </fieldset>
               </div>
             </div>
 
-            <button className='submit-button font-cs'>start now</button>
+            <button disabled className='submit-button font-cs'>start now</button>
           </div>
         </div>
       </div>
@@ -474,6 +474,9 @@ const MigrationContanier = styled.div`
             &:hover {
               color: white;
             }
+            &[disabled] {
+              cursor: not-allowed;
+            }
           }
         }
 
@@ -495,6 +498,9 @@ const MigrationContanier = styled.div`
       &:hover {
         background: white;
         color: var(--text-color);
+      }
+      &[disabled] {
+        cursor: not-allowed;
       }
     }
   }
