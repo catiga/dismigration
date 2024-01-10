@@ -9,6 +9,7 @@ import { getLocal } from "../../utils"
 import { useEffect, useState } from "react";
 import { Link, useLocation, useHistory } from 'react-router-dom'
 import Button from '../../component/Button';
+import Toast from '../../component/Toast';
 
 export default function Header(props) {
   const { accounts, currentTokenBalance } = useGlobal()
@@ -18,6 +19,8 @@ export default function Header(props) {
   const [showWallet, setShowWallet] = useState('')
   const location = useLocation();
   const history = useHistory();
+  const [showToast, setShowToast] = useState(false);
+
   useEffect(() => {
     if (currentTokenBalance) {
       setCurrentBalance(currentTokenBalance)
@@ -38,6 +41,13 @@ export default function Header(props) {
       block: 'center'
     })
   }
+
+  const handlePledge = () => {
+    setShowToast(true);
+    setTimeout(() => {
+      setShowToast(false);
+    }, 3000); // Toast显示3秒后自动隐藏
+  }
   
   return (
     <HeaderContanier>
@@ -53,9 +63,7 @@ export default function Header(props) {
           <p className='nav' onClick={() => handleGotoView('info')}>Info</p>
           <p className='nav' onClick={() => handleGotoView('community')}>Community</p>
           <p className='nav' onClick={() => handleGotoView('partners')}>Partners</p>
-          <Link to="/migration/start">
-            <p className='stake' data-text="Pledge">Pledge</p>
-          </Link>
+          <p className='stake nav' onClick={() => handlePledge()} data-text="Pledge">Pledge</p>
           {
             (!accounts && !getLocal('account')) && <ConnectButton />
           }
@@ -73,6 +81,8 @@ export default function Header(props) {
             </div>
           }
         </div>
+
+        <Toast showToast={showToast} message="Coming soon!" />
       </div>
     </HeaderContanier>
   )
