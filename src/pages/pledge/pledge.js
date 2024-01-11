@@ -8,6 +8,7 @@ import { BigNumber } from 'ethers';
 import { TOKEN_ABI } from '../../abi/index'
 import { selectChain } from '../../data/lockde'
 import Toast from '../../component/Toast';
+import Loading from '../../component/LoadingOutlined';
 
 const ethfRpcProvider = "https://rpc.dischain.xyz/"
 const bscRpcProvider = "https://bsc-dataseed3.ninicoin.io"
@@ -38,6 +39,8 @@ export default function Migration() {
   const [pledgeDis, setPledgeDis] = useState('')
   const [toastMessage, setToastMessage] = useState('')
   const [showToast, setShowToast] = useState(false);
+  const [blockNumber, setBlockNumber] = useState('');
+  const [pledgeLoading, setPledgeLoading] = useState(false);
 
   const [ethfCutOffTs, setEthfCutOffTs] = useState(0)
 
@@ -53,10 +56,8 @@ export default function Migration() {
   }
 
   const handleDeposit = async (account) => {
-    const chainLockerEthf = selectChain(513100)
-    const ethfLocker = new web3Ethf.eth.Contract(chainLockerEthf.abi, chainLockerEthf.address)
+    const ethfLocker = new web3Ethf.eth.Contract(TOKEN_ABI, disAddress)
     const depositEthfWei = await ethfLocker.methods.deposits(account).call()
-    setEthfDeposit(depositEthfWei)
     setDisDeposit(depositEthfWei)
   }
 
@@ -98,6 +99,12 @@ export default function Migration() {
     const rewardTotal = await ethfLocker.methods.rewardPerTokenStored().call()
     console.log(':::>rewardPerTokenStored:', rewardTotal)
     setRewardTotal(rewardTotal)
+  }
+
+  const getBlockNumber = async() => {
+    const ethfLocker = new web3Ethf.eth.Contract(TOKEN_ABI, disAddress)
+    const blockNumber = await ethfLocker.methods.onStartBlock().call()
+    setBlockNumber(blockNumber.toString())
   }
 
   const truncateBigNumber = (bigNum, decimalPlaces) => {
@@ -211,12 +218,15 @@ export default function Migration() {
       return console.log('没连接钱包')
     }
 
+    if (!!pledgeLoading) return;
+
+    setPledgeLoading(true)
     const web3 = new Web3(window.ethereum)
     await window.ethereum.request({ method: 'eth_requestAccounts' });
     const currentNetwork = await web3.eth.net.getId()
 
     let moveon = false
-    console.log('currentNetwork:,', currentNetwork)
+    
     if (currentNetwork != 513100) {
       try {
         await window.ethereum.request({
@@ -241,6 +251,7 @@ export default function Migration() {
         })
         moveon = true
       } catch (e) {
+        setPledgeLoading(false)
         if ((e).code === 4902) {
           try {
             await (window.ethereum).request({
@@ -256,7 +267,9 @@ export default function Migration() {
                 rpcUrls: [bscRpcProvider]
               }]
             })
-          } catch (ee) { }
+          } catch (ee) { 
+            setPledgeLoading(false)
+          }
         }
       }
     } else {
@@ -264,51 +277,35 @@ export default function Migration() {
     }
 
     if (moveon) {
-      console.log('>>我执行了02')
-      // const chainLocker = selectChain(56)
-      // 
-      // const _20DisContract = new web3.eth.Contract(TOKEN_ABI, disAddress)
-      // const allowance = await _20DisContract.methods.allowance(accounts[0], chainLocker.address).call()
-      // moveon = false
-      // if (allowance < BigNumber.from(pledgeDisWei)) {
-      //   const approveCallData = _20DisContract.methods.approve(chainLocker.address, pledgeDisWei).encodeABI()
-      //   try {
-      //     const approveTx = await _20DisContract.methods.approve(chainLocker.address, pledgeDisWei).send({
-      //       from: accounts[0],
-      //       gas: 300000,
-      //       data: approveCallData
-      //     })
-      //     if (Number(approveTx.status) == 1) {
-      //       moveon = true
-      //     }
-      //   } catch (e) {
-      //   }
-      // } else {
-      //   moveon = true
-      // }
       const pledgeDisWei = web3.utils.toWei(pledgeDis, "ether")
       const disLocker = new web3.eth.Contract(TOKEN_ABI, disAddress)
       const calldata = disLocker.methods.stakeAndReward(pledgeDisWei).encodeABI()
-
+      
       try {
+
         const transaction = await disLocker.methods.stakeAndReward(pledgeDisWei).send({
           from: accounts[0],
           gas: 300000,
           data: calldata,
           value: pledgeDisWei,
         })
-        transaction.on('receipt', (receipt) => {
-          console.log("transaction mining", receipt)
-          if (Number(receipt.status) == 1) {
-            handleDeposit(accounts[0])
-            handleTotalSupply()
+        console.log('transaction>', transaction)
+        
+        try {
+          setPledgeLoading(false)
+          if (Number(transaction.status) == 1) {
+            handleDeposit(accounts[0]);
+            handleTotalSupply();
           }
-        }).on('error', (error) => {
-          console.log('error', error)
-        })
-        await transaction;
-      } catch (e) {
-        console.log()
+        } catch (error) {
+          console.log('Error:', error);
+          setPledgeLoading(false)
+        }
+
+      } catch(error) {
+        console.log('e::>', error)
+        setPledgeLoading(false)
+        handleToast(error.data?.message)
       }
     }
   }
@@ -360,7 +357,13 @@ export default function Migration() {
     }
     handleTotalSupply()
     getTotalRewards()
+    getBlockNumber()
 
+    // const intervalBlock = setInterval(() => {
+    //   getBlockNumber()
+    // }, 2000);
+
+    // return () => clearInterval(intervalBlock);
   }, [accounts])
 
   return (
@@ -372,12 +375,14 @@ export default function Migration() {
         <p className='text-sm'>Both ETHF and DIS will release currency exchange contracts. The currency exchange contract is a token distribution on the new main network. The address holding ETHF needs to pledge the tokens to the currency exchange contract of ETHF. The address holding Dis needs to transfer the tokens. The currency is pledged to the currency exchange contract of Dis.</p>
       </div>
 
+      <div className='block-number w-[1000px] mx-auto font-cs text-xl'>
+        <h1>Start Block: {blockNumber || ' loading...'}</h1>
+      </div>
       <InnerContainer className='font-cm'>
 
         <InnerTop>
           <TitleText>$DIS total stake</TitleText>
           <HolderScore>{numberWithCommas((BigNumber.from(disTotal) / BigNumber.from(dec)).toFixed(4))}</HolderScore>
-          {/* <DefaultButton>Deposit $Blur to earn</DefaultButton> */}
         </InnerTop>
 
         <InnerBottom>
@@ -405,7 +410,6 @@ export default function Migration() {
                 ? <SecondScore>{(BigNumber.from(disReward) / BigNumber.from(dec)).toFixed(4)}</SecondScore>
                 : <SecondScore>--.--</SecondScore>
             }
-            {/* <DescriptionText>Earning<span style={{'color':'#ADE25D','margin': '0 8px'}}>0 DIS</span>Per Hour</DescriptionText> */}
           </InnerBottomItem>
 
         </InnerBottom>
@@ -418,7 +422,14 @@ export default function Migration() {
                 <input placeholder='Pledge Quantity' value={pledgeDis} onChange={e => setPledgeDis(e.target.value)} type='number' />
                 <button className='button-max' onClick={() => { handleInputPledgeDis() }}>max</button>
               </div>
-              <button className='submit-button font-cs' onClick={() => handleStakeDis()}>质押</button>
+              <button className='submit-button font-cs' onClick={() => handleStakeDis()}>
+                {
+                  pledgeLoading 
+                    ? <Loading/>
+                    : ''
+                }
+                Pledge
+              </button>
             </div>
           </WithdrawContainer>
           <MyBalace>
@@ -452,7 +463,7 @@ const MigrationContanier = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 40px;
+  gap: 30px;
 
   .sub-title {
     font-size: 14px;
@@ -577,16 +588,18 @@ const WithdrawContainer = styled.div`
 
   .submit-button {
     background: var(--color);
-    width: 120px;
     line-height: 1.2;
     font-size: 16px;
-    padding: 12px 0;
+    padding: 12px 30px;
     color: white;
     border-radius: 6px;
     clip-path: polygon(20px 0,100% 0,100% 50%,calc(100% - 20px) 100%,0 100%,0 50%);
     transition: all .3s;
     margin-top: 20px;
     text-transform: capitalize;
+    display: flex;
+    align-items: center;
+    gap: 6px;
     &:hover {
       background: white;
       color: var(--text-color);
