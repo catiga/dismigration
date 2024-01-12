@@ -2,6 +2,7 @@ import React, { Fragment, useRef } from 'react'
 import ReactDOM from 'react-dom'
 import './style.scss'
 import styled from 'styled-components'
+import Close from '../assets/icon/Close.svg'
 const Titles = styled.div`
   flex:1;
 `
@@ -27,6 +28,7 @@ export default function ModalContainer(props) {
           <div className="mask f-c-c">
           <div className={slider ? `modal-wrap fixed` : `modal-wrap`} onClick={close} ref={ maskRef } >
             <div className="modal" {...rest}>
+              <img className='icon-close w-4' src={Close} />
               <div className="iconfont icon-close" onClick={()=> props.onClose(false)}/>
                 {
                   title &&

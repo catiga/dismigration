@@ -1,5 +1,5 @@
 import { Image } from '../../component'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import Button from '../../component/Button'
 import { useEffect, useState } from 'react'
 import useGlobal from "../../hooks/useGlobal";
@@ -8,6 +8,7 @@ import { BigNumber } from 'ethers';
 import { TOKEN_ABI } from '../../abi/index'
 import { selectChain } from '../../data/lockde'
 import Toast from '../../component/Toast';
+import Modal from '../../component/Modal';
 import Loading from '../../component/LoadingOutlined';
 
 const ethfRpcProvider = "https://rpc.dischain.xyz/"
@@ -37,10 +38,13 @@ export default function Migration() {
 
   const [pledgeEthf, setPledgeEthf] = useState('')
   const [pledgeDis, setPledgeDis] = useState('')
+  const [withdrawDis, setWithdrawDis] = useState('')
   const [toastMessage, setToastMessage] = useState('')
   const [showToast, setShowToast] = useState(false);
   const [blockNumber, setBlockNumber] = useState('');
   const [pledgeLoading, setPledgeLoading] = useState(false);
+  const [withdrawLoading, setWithdrawLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false)
 
   const [ethfCutOffTs, setEthfCutOffTs] = useState(0)
 
@@ -52,12 +56,17 @@ export default function Migration() {
 
   const handleBalance = async (account) => {
     const balanceEthfWei = await web3Ethf.eth.getBalance(account)
+
+    // const ethfLocker = new web3Ethf.eth.Contract(TOKEN_ABI, disAddress)
+    // const depositEthfWei = await ethfLocker.methods.balanceOf(account).call()
+    // console.log('balanceOf>>', depositEthfWei)
     setDisBalance(balanceEthfWei)
   }
 
   const handleDeposit = async (account) => {
     const ethfLocker = new web3Ethf.eth.Contract(TOKEN_ABI, disAddress)
     const depositEthfWei = await ethfLocker.methods.deposits(account).call()
+    console.log('deposits>>', depositEthfWei)
     setDisDeposit(depositEthfWei)
   }
 
@@ -91,13 +100,13 @@ export default function Migration() {
     setDisTotal(Number(endTs))
 
     const disTotalSupply = await ethfLocker.methods.totalSupply().call()
+    console.log('totalSupply>>', disTotalSupply)
     setDisTotal(disTotalSupply)
   }
 
   const getTotalRewards = async () => {
     const ethfLocker = new web3Ethf.eth.Contract(TOKEN_ABI, disAddress)
     const rewardTotal = await ethfLocker.methods.rewardPerTokenStored().call()
-    console.log(':::>rewardPerTokenStored:', rewardTotal)
     setRewardTotal(rewardTotal)
   }
 
@@ -135,6 +144,15 @@ export default function Migration() {
     const loadBal = ((BigNumber.from(disBalance)) / BigNumber.from(dec))//.toFixed(4)
 
     setPledgeDis(truncateBigNumber(loadBal, 4))
+  }
+  
+  const handleInputWithdrawDis = async () => {
+    if (BigNumber.from(disDeposit) == BigNumber.from(0)) {
+      return
+    }
+    const loadBal = ((BigNumber.from(disDeposit)) / BigNumber.from(dec))//.toFixed(4)
+  
+    setWithdrawDis(truncateBigNumber(loadBal, 4))
   }
 
   const handleStakeEthf = async () => {
@@ -210,7 +228,7 @@ export default function Migration() {
       return
     }
     if (!pledgeDis) {
-      handleToast('请获取$DIS')
+      handleToast('Please enter the $DIS to stake.')
       return
     }
 
@@ -319,26 +337,142 @@ export default function Migration() {
   }
 
   const handleWithdraw = async () => {
+
+    if (!accounts) {
+      handleToast('Please Connect Wallet')
+      return
+    }
+
+    const loadBal = ((BigNumber.from(disDeposit)) / BigNumber.from(dec))//.toFixed(4)
+    if (loadBal <= 0) {
+      return handleToast('Deposited 0 $DIS')
+    }
+
+    if (!!!withdrawDis) {
+      handleToast('Please enter the $DIS to withdraw.')
+      return
+    }
+
+    if (!window.ethereum) {
+      return console.log('没连接钱包')
+    }
+
+    if (!!withdrawLoading) return;
+
+    setWithdrawLoading(true)
     const web3 = new Web3(window.ethereum)
-    const chainLocker = selectChain(513100)
-    const ethfLocker = new web3.eth.Contract(chainLocker.abi, chainLocker.address)
+    const withdrawDisWei = web3.utils.toWei(withdrawDis, "ether")
+    const contract = new web3.eth.Contract(TOKEN_ABI, disAddress)
+    const calldata = contract.methods.withdraw(withdrawDisWei).encodeABI()
 
-    const mgrAbi = [{ "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "previousOwner", "type": "address" }, { "indexed": true, "internalType": "address", "name": "newOwner", "type": "address" }], "name": "OwnershipTransferred", "type": "event" }, { "inputs": [], "name": "owner", "outputs": [{ "internalType": "address", "name": "", "type": "address" }], "stateMutability": "view", "type": "function", "constant": true }, { "inputs": [], "name": "renounceOwnership", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "newOwner", "type": "address" }], "name": "transferOwnership", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "contract DisUpgradeProxy", "name": "proxy", "type": "address" }], "name": "getProxyImplementation", "outputs": [{ "internalType": "address", "name": "", "type": "address" }], "stateMutability": "view", "type": "function", "constant": true }, { "inputs": [{ "internalType": "contract DisUpgradeProxy", "name": "proxy", "type": "address" }], "name": "getProxyAdmin", "outputs": [{ "internalType": "address", "name": "", "type": "address" }], "stateMutability": "view", "type": "function", "constant": true }, { "inputs": [{ "internalType": "contract DisUpgradeProxy", "name": "proxy", "type": "address" }, { "internalType": "address", "name": "_newAdmin", "type": "address" }], "name": "changeProxyAdmin", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "contract DisUpgradeProxy", "name": "proxy", "type": "address" }, { "internalType": "address", "name": "_newImpl", "type": "address" }], "name": "upgrade", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "contract DisUpgradeProxy", "name": "proxy", "type": "address" }, { "internalType": "address", "name": "_newImpl", "type": "address" }, { "internalType": "bytes", "name": "data", "type": "bytes" }], "name": "upgradeAndCall", "outputs": [], "stateMutability": "payable", "type": "function", "payable": true }, { "inputs": [{ "internalType": "contract DisUpgradeProxy", "name": "proxy", "type": "address" }, { "internalType": "bytes", "name": "data", "type": "bytes" }], "name": "configCall", "outputs": [], "stateMutability": "payable", "type": "function", "payable": true }]
-    const mgrAddr = '0xB7FEDf6809a4E83B6B0CD92DA3AAF468F461A8DC'
-
-    const adminLocker = new web3.eth.Contract(mgrAbi, mgrAddr)
-    const calldata = ethfLocker.methods.withdraw(0, '0xDC6F036a6FE27c8e70F4cf3b2f87Bd97a6b29a2f').encodeABI()
-    const fullCallData = adminLocker.methods.configCall('0x46b12D505a7b0E58A837789221A026FBF1156401', calldata).encodeABI()
-
-    adminLocker.methods.configCall('0x46b12D505a7b0E58A837789221A026FBF1156401', calldata).send({
+    let trObj = {
       from: accounts[0],
-      data: fullCallData,
       gas: 300000,
-    }).on('receipt', (r) => {
-      console.log("result:", r)
-    }).on('error', (error) => {
-      console.log('error', error)
-    })
+      data: calldata,
+    }
+    
+    try {
+
+      let gase = await contract.methods.withdraw(withdrawDisWei).estimateGas(trObj)
+      console.log("gase: ", gase)
+
+      contract.methods.withdraw(withdrawDisWei).send({
+        from: accounts[0],
+        gas: 300000,
+        data: calldata,
+      }).on('receipt', (r) => {
+        console.log("result:", r)
+        setWithdrawLoading(false)
+      }).on('error', (error) => {
+        console.log('error', error)
+        setWithdrawLoading(false)
+      })
+
+    } catch(error) {
+
+      console.log("err: ", trObj)
+      setWithdrawLoading(false)
+      handleToast(error.data?.message || error.message)
+
+    }
+
+  }
+
+  const handleWithdrawAll = async () => {
+    if (!accounts) {
+      handleToast('Please Connect Wallet')
+      return
+    }
+    const loadBal = ((BigNumber.from(disDeposit)) / BigNumber.from(dec))//.toFixed(4)
+    if (loadBal <= 0) {
+      return handleToast('Deposited 0 $DIS')
+    }
+    const web3 = new Web3(window.ethereum)
+    const contract = new web3.eth.Contract(TOKEN_ABI, disAddress)
+    const calldata = contract.methods.withdrawAll().encodeABI()
+
+    try {
+
+      const trObj = {
+        from: accounts[0],
+        gas: 300000,
+        data: calldata,
+      }
+
+      let gase = await contract.methods.withdrawAll().estimateGas(trObj)
+
+      const r = await contract.methods.withdrawAll().send({
+        from: accounts[0],
+        gas: gase,
+        data: calldata,
+      });
+    } catch(err) {
+      console.log('>>>r:', err)
+      handleToast(err.data?.message || err.message)
+    }
+  }
+
+  const handleWithdrawRewards = async () => {
+    if (!accounts) {
+      handleToast('Please Connect Wallet')
+      return
+    }
+
+    // 用户无奖励
+    const loadBal = ((BigNumber.from(disReward)) / BigNumber.from(dec))//.toFixed(4)
+    if (loadBal <= 0) {
+      return handleToast('You don\'t have $DIS reward.')
+    }
+
+    // 质押池奖励不够
+    const userDisReward = ((BigNumber.from(disReward)) / BigNumber.from(dec))
+    const totalDis = (BigNumber.from(disTotal) / BigNumber.from(dec))
+    if (userDisReward > totalDis ) {
+      return handleToast('Sorry, not enough $DIS.')
+    }
+
+    const web3 = new Web3(window.ethereum)
+    const contract = new web3.eth.Contract(TOKEN_ABI, disAddress)
+    const calldata = contract.methods.getReward().encodeABI()
+
+    try {
+      let tr = {
+        from: accounts[0],
+        gas: 300000,
+        data: calldata,
+      }
+      const gas = await contract.methods.getReward().estimateGas(tr)
+
+      const r = await contract.methods.getReward().send({
+        from: accounts[0],
+        gas: 300000,
+        data: calldata,
+      });
+    } catch(err) {
+      console.log('>>>r:', err)
+      handleToast(err.data?.message || err.message)
+    }
+
   }
 
   useEffect(() => {
@@ -375,8 +509,9 @@ export default function Migration() {
         <p className='text-sm'>Discover the rewarding world of $DIS, the native coin of Disney Chain, a POW public blockchain where miners can engage in mining operations to earn $DIS tokens. Not just for miners, $DIS holders can also participate in the network by staking their coins, joining the mining process, and reaping rewards. With a steady generation of 0.3171 $DIS per second, entering the Disney Chain ecosystem is not only a venture into a robust POW platform but also an opportunity to share in the ongoing distribution of rewards. Secure your spot in this lucrative mining landscape by acquiring $DIS and staking to earn your share of the digital bounty. Join us and become a part of the Disney Chain community, where your contribution is valued and rewarded every second!</p>
       </div>
 
-      <div className='block-number w-[1000px] mx-auto font-cs text-xl'>
-        <h1>Start Block: {blockNumber || ' loading...'}</h1>
+      <div className='text-gray-300 w-[1000px] mx-auto font-cm text-base flex items-center'>
+        <h1>Wallet Balance: { accounts ? <span>{ (BigNumber.from(disBalance) / BigNumber.from(dec)).toFixed(4) } DIS</span> : <span>--.--</span> }</h1>
+        <h1 style={{'marginLeft': 'auto'}}>Start Block: {blockNumber || ' loading...'}</h1>
       </div>
       <InnerContainer className='font-cm'>
 
@@ -393,23 +528,24 @@ export default function Migration() {
             {/* <DescriptionText>DIS/ETHF (day)*</DescriptionText> */}
           </InnerBottomItem>
 
-          <InnerBottomItem>
+          <InnerBottomItem style={{'borderLeft': '1px solid #1559ed', 'borderRight': '1px solid #1559ed'}}>
             <TitleText>$DIS Deposited</TitleText>
             {
               accounts
                 ? <SecondScore>{(BigNumber.from(disDeposit) / BigNumber.from(dec)).toFixed(4)}</SecondScore>
                 : <SecondScore>--.--</SecondScore>
-            }
-            {/* <DescriptionText>Earning<span style={{'color':'#ADE25D','margin': '0 8px'}}>0 DIS</span>Per Hour</DescriptionText> */}
+              }
+            <DefaultButton onClick={() => handleWithdrawAll()}>Withdraw All</DefaultButton>
           </InnerBottomItem>
 
           <InnerBottomItem>
             <TitleText>$DIS Earned</TitleText>
             {
               accounts
-                ? <SecondScore>{(BigNumber.from(disReward) / BigNumber.from(dec)).toFixed(4)}</SecondScore>
-                : <SecondScore>--.--</SecondScore>
+              ? <SecondScore>{(BigNumber.from(disReward) / BigNumber.from(dec)).toFixed(4)}</SecondScore>
+              : <SecondScore>--.--</SecondScore>
             }
+            <DefaultButton onClick={() => handleWithdrawRewards()}>Get Reward</DefaultButton>
           </InnerBottomItem>
 
         </InnerBottom>
@@ -422,24 +558,33 @@ export default function Migration() {
                 <input placeholder='Pledge Quantity' value={pledgeDis} onChange={e => setPledgeDis(e.target.value)} type='number' />
                 <button className='button-max' onClick={() => { handleInputPledgeDis() }}>max</button>
               </div>
-              <button className='submit-button font-cs' onClick={() => handleStakeDis()}>
+              <ClipButton className='font-cs' onClick={() => handleStakeDis()}>
                 {
                   pledgeLoading 
                     ? <Loading/>
                     : ''
                 }
                 Pledge
-              </button>
+              </ClipButton>
             </div>
           </WithdrawContainer>
-          <MyBalace>
-            <TitleText>Wallet Balance</TitleText>
-            {
-              accounts
-                ? <SecondScore>{ (BigNumber.from(disBalance) / BigNumber.from(dec)).toFixed(4) } DIS</SecondScore>
-                : <SecondScore>--.--</SecondScore>
-            }
-          </MyBalace>
+          <WithdrawContainer style={{'borderLeft': '1px solid #1559ed'}}>
+            <TitleText>Withdraw</TitleText>
+            <div className='flex items-center gap-4'>
+              <div className='input-box flex items-center'>
+                <input placeholder='Withdraw Quantity' value={withdrawDis} onChange={e => setWithdrawDis(e.target.value)} type='number' />
+                <button className='button-max' onClick={() => { handleInputWithdrawDis() }}>max</button>
+              </div>
+              <ClipButton className='font-cs' onClick={() => handleWithdraw()}>
+                {
+                  withdrawLoading 
+                    ? <Loading/>
+                    : ''
+                }
+                Withdraw
+              </ClipButton>
+            </div>
+          </WithdrawContainer>
         </BalanceContainer>
 
       </InnerContainer>
@@ -516,7 +661,9 @@ const InnerBottom = styled.div`
   border-top: 1px solid var(--color);
 `
 
-const InnerBottomItem = styled.div`
+const InnerBottomItem = styled.div.attrs(props => ({
+  className: `${props.customClass || ''}`,
+}))`
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -542,7 +689,32 @@ const DefaultButton = styled.div`
   font-size: 12px;
   color: black;
   border-radius: 4px;
-  padding: 8px 16px;
+  padding: 5px 12px;
+  cursor: pointer;
+`
+
+const ClipButton = styled.button`
+  --color: #1559ed;
+  background: var(--color);
+  line-height: 1.2;
+  font-size: 13px;
+  padding: 8px 23px;
+  color: black;
+  border-radius: 4px;
+  clip-path: polygon(20px 0,100% 0,100% 50%,calc(100% - 20px) 100%,0 100%,0 50%);
+  transition: all .3s;
+  margin-top: 20px;
+  text-transform: capitalize;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  &:hover {
+    background: white;
+    color: var(--text-color);
+  }
+  &[disabled] {
+    cursor: not-allowed;
+  }
 `
 
 const BalanceContainer = styled.div`
@@ -554,10 +726,10 @@ const BalanceContainer = styled.div`
 const WithdrawContainer = styled.div`
   --color: #1559ed;
   display: flex;
+  flex: 1;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border-right: 1px solid var(--color);
   padding: 23px;
   .input-box {
     border: 1px solid var(--color);
@@ -566,17 +738,17 @@ const WithdrawContainer = styled.div`
 
     >input {
       flex: 1;
-      font-size: 14px;
-      padding: 10px;
+      font-size: 13px;
+      padding: 8px 10px;
       color: white;
     }
 
     .button-max {
-      width: 120px;
+      width: 100px;
       align-self: stretch;
       text-transform: uppercase;
       border-left: 1px solid var(--color);
-      font-size: 14px;
+      font-size: 10px;
       &:hover {
         color: white;
       }
@@ -590,7 +762,7 @@ const WithdrawContainer = styled.div`
     background: var(--color);
     line-height: 1.2;
     font-size: 16px;
-    padding: 12px 30px;
+    padding: 10px 30px;
     color: white;
     border-radius: 6px;
     clip-path: polygon(20px 0,100% 0,100% 50%,calc(100% - 20px) 100%,0 100%,0 50%);
@@ -608,13 +780,4 @@ const WithdrawContainer = styled.div`
       cursor: not-allowed;
     }
   }
-`
-
-const MyBalace = styled.div`
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
 `
