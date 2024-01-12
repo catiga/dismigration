@@ -151,7 +151,7 @@ export default function Migration() {
       try {
         await window.ethereum.request({
           method: 'wallet_switchEthereumChain',
-          params: [{ chainId: '0x7d44c' }]
+          params: [{ chainId: 0x7d44c }]
         })
         moveon = true
       } catch (e) {
@@ -160,11 +160,11 @@ export default function Migration() {
             await (window.ethereum).request({
               method: 'wallet_addEthereumChain',
               params: [{
-                chainId: '0x7d44c',
+                chainId: 0x7d44c,
                 chainName: 'EthereumFair',
                 nativeCurrency: {
-                  name: 'ETHF',
-                  symbol: 'ETHF',
+                  name: 'DIS',
+                  symbol: 'DIS',
                   decimals: 18
                 },
                 rpcUrls: [ethfRpcProvider]
@@ -206,7 +206,7 @@ export default function Migration() {
 
   const handleStakeDis = async () => {
     if (!accounts) {
-      handleToast('请连接钱包')
+      handleToast('Please Connect Wallet')
       return
     }
     if (!pledgeDis) {
@@ -233,7 +233,7 @@ export default function Migration() {
           method: 'wallet_addEthereumChain',
           params: [
             {
-              chainId: '0x7d06c',
+              chainId: '0x7d44c',
               chainName: 'DIS',  // 替换为您的链的名称
               nativeCurrency: {
                 name: 'DIS',
@@ -247,7 +247,7 @@ export default function Migration() {
         })
         await window.ethereum.request({
           method: 'wallet_switchEthereumChain',
-          params: [{ chainId: '0x7d06c' }]
+          params: [{ chainId: '0x7d44c' }]
         })
         moveon = true
       } catch (e) {
@@ -370,9 +370,9 @@ export default function Migration() {
     <MigrationContanier>
 
       <div className='w-[1000px] leading-[1.2]'>
-        <h1 className='text-2xl font-cs'>Migration</h1>
-        <p className='text-sm my-2'>Why migration ETHF and DIS?</p>
-        <p className='text-sm'>Both ETHF and DIS will release currency exchange contracts. The currency exchange contract is a token distribution on the new main network. The address holding ETHF needs to pledge the tokens to the currency exchange contract of ETHF. The address holding Dis needs to transfer the tokens. The currency is pledged to the currency exchange contract of Dis.</p>
+        <h1 className='text-2xl font-cs'>$DIS Staking Mining</h1>
+        <p className='text-sm my-2'>Why to Join Mine by Staking?</p>
+        <p className='text-sm'>Discover the rewarding world of $DIS, the native coin of Disney Chain, a POW public blockchain where miners can engage in mining operations to earn $DIS tokens. Not just for miners, $DIS holders can also participate in the network by staking their coins, joining the mining process, and reaping rewards. With a steady generation of 0.3171 $DIS per second, entering the Disney Chain ecosystem is not only a venture into a robust POW platform but also an opportunity to share in the ongoing distribution of rewards. Secure your spot in this lucrative mining landscape by acquiring $DIS and staking to earn your share of the digital bounty. Join us and become a part of the Disney Chain community, where your contribution is valued and rewarded every second!</p>
       </div>
 
       <div className='block-number w-[1000px] mx-auto font-cs text-xl'>
@@ -394,7 +394,7 @@ export default function Migration() {
           </InnerBottomItem>
 
           <InnerBottomItem>
-            <TitleText>DIS Deposited</TitleText>
+            <TitleText>$DIS Deposited</TitleText>
             {
               accounts
                 ? <SecondScore>{(BigNumber.from(disDeposit) / BigNumber.from(dec)).toFixed(4)}</SecondScore>
@@ -404,7 +404,7 @@ export default function Migration() {
           </InnerBottomItem>
 
           <InnerBottomItem>
-            <TitleText>DIS Income</TitleText>
+            <TitleText>$DIS Earned</TitleText>
             {
               accounts
                 ? <SecondScore>{(BigNumber.from(disReward) / BigNumber.from(dec)).toFixed(4)}</SecondScore>
