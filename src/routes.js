@@ -28,6 +28,13 @@ const routes = [
     exact:true,
     compontent: lazy(() => import('./pages/pledge/pledge'))
   },
+  {
+    name: 'Yield',
+    path: '/yield',
+    ico:'home',
+    exact:true,
+    compontent: lazy(() => import('./pages/yield/yield'))
+  },
 ]
 export default routes
 
