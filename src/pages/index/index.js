@@ -62,7 +62,7 @@ export default function Index() {
             {/* banner01 */}
             <div className="banner-box">
                 <img className="bg" src={BANNER} />
-                <div className="title-box">
+                <div className="title-box w-[90%] lg:w-[66%]">
                     <h1 className="title font-cs">Disney (DIS)  Chain</h1>
                     <div className="p">
                         <p className="des">Anticipate the opportunity for potential pledge rewards as DIS Chain's Mainnet launches. Will disclose the block height that initiates the mining activity.</p>
@@ -143,8 +143,8 @@ export default function Index() {
             <div id="community" className="section04 px-4 lg:px-40 py-20 text-center flex flex-col lg:flex-row items-center">
                 <div className="flex-1">
                     <h1 className="text-4xl font-cs tracking-wider">Community</h1>
-                    <p className="text-xl font-cm py-3 text-[#6f7174] w-">Collaborations with social platforms like Linkenetwork, DeNet, promoting DIS Chain on social media.</p>
-                    <div className="social-box grid grid-cols-3 w-[30rem] mx-auto py-8 divide-x divide-[#d7d7d7] mt-8">
+                    <p className="text-xl font-cm py-3 text-[#6f7174]">Collaborations with social platforms like Linkenetwork, DeNet, promoting DIS Chain on social media.</p>
+                    <div className="social-box grid grid-cols-1 lg:grid-cols-3 lg:w-[30rem] mx-auto py-8 divide-x divide-[#d7d7d7] mt-8">
                         <div className="social-item">
                             <img className="w-8 mx-auto" src={DISCORD} />
                             <p className="mt-1">Discord</p>
@@ -164,7 +164,7 @@ export default function Index() {
             {/* 合作伙伴儿 */}
             <div id="partners" className="section05 px-4 lg:px-40 py-20 text-center">
                 <h1 className="text-4xl text-white font-cs tracking-wider">Partners</h1>
-                <div className="flex items-center justify-center gap-8 mt-8">
+                <div className="flex flex-col lg:flex-row items-center justify-center gap-8 mt-8">
                     <img className="h-10" src={PARTNER01} />
                     <img className="h-10" src={PARTNER02} />
                     <img className="h-10" src={PARTNER03} />
@@ -224,7 +224,6 @@ const IndexContainer = styled.div`
             top: 45%;
             transform: translate(-50%, -50%);
             color: white;
-            width: 66%;
             display: flex;
             flex-direction: column;
             z-index: 2;
