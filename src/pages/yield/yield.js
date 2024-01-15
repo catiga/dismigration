@@ -67,7 +67,6 @@ export default function Migration() {
   const handleDeposit = async (account) => {
     const ethfLocker = new web3Ethf.eth.Contract(TOKEN_ABI, disAddress)
     const depositEthfWei = await ethfLocker.methods.deposits(account).call()
-    console.log('deposits>>', depositEthfWei)
     setDisDeposit(depositEthfWei)
   }
 
@@ -101,7 +100,6 @@ export default function Migration() {
     setDisTotal(Number(endTs))
 
     const disTotalSupply = await ethfLocker.methods.totalSupply().call()
-    console.log('totalSupply>>', disTotalSupply)
     setDisTotal(disTotalSupply)
   }
 
@@ -111,7 +109,6 @@ export default function Migration() {
     setRewardTotal(rewardTotal)
 
     const rewardPerSec = await ethfLocker.methods.rewardPerSec().call()
-    console.log('rewardPerTokenStored：', rewardTotal, rewardPerSec)
     setRewardDynamic(rewardPerSec)
   }
 
@@ -137,7 +134,6 @@ export default function Migration() {
       return
     }
     const loadBal = ((BigNumber.from(ethfBalance) - BigNumber.from(gasPrice)) / BigNumber.from(dec))//.toFixed(4)
-    console.log('huoqubalance:', loadBal, truncateBigNumber(loadBal, 4))
     // setPledgeEthf(loadBal)
     setPledgeEthf(truncateBigNumber(loadBal, 4))
   }
@@ -377,10 +373,10 @@ export default function Migration() {
     }
     
     try {
-
-      let gase = await contract.methods.withdraw(withdrawDisWei).estimateGas(trObj)
-      console.log("gase: ", gase)
-
+      const deposits = await contract.methods.deposits(accounts[0]).call();
+      const balance = await contract.methods.balanceOf(accounts[0]).call();
+      console.log('current available:', accounts[0], withdrawDisWei, deposits, balance);
+      
       contract.methods.withdraw(withdrawDisWei).send({
         from: accounts[0],
         gas: 300000,
@@ -508,24 +504,24 @@ export default function Migration() {
   return (
     <MigrationContanier>
 
-      <div className='w-[1000px] leading-[1.2]'>
+      <div className='w-[90%] lg:w-[1000px] leading-[1.2]'>
         <h1 className='text-2xl font-cs'>$DIS Staking Mining</h1>
         <p className='text-sm my-2'>Why to Join Mine by Staking?</p>
         <p className='text-sm'>Discover the rewarding world of $DIS, the native coin of Disney Chain, a POW public blockchain where miners can engage in mining operations to earn $DIS tokens. Not just for miners, $DIS holders can also participate in the network by staking their coins, joining the mining process, and reaping rewards. With a steady generation of 0.3171 $DIS per second, entering the Disney Chain ecosystem is not only a venture into a robust POW platform but also an opportunity to share in the ongoing distribution of rewards. Secure your spot in this lucrative mining landscape by acquiring $DIS and staking to earn your share of the digital bounty. Join us and become a part of the Disney Chain community, where your contribution is valued and rewarded every second!</p>
       </div>
 
-      <div className='text-gray-300 w-[1000px] mx-auto font-cm text-base flex items-center'>
-        <h1>Wallet Balance: { accounts ? <span>{ (BigNumber.from(disBalance) / BigNumber.from(dec)).toFixed(4) } DIS</span> : <span>--.--</span> }</h1>
+      <div className='text-gray-300 w-[90%] lg:w-[1000px] mx-auto font-cm text-base flex flex-col lg:flex-row items-center'>
+        <h1 className='ml-auto lg:ml-0'>Wallet Balance: { accounts ? <span>{ (BigNumber.from(disBalance) / BigNumber.from(dec)).toFixed(4) } DIS</span> : <span>--.--</span> }</h1>
         <h1 style={{'marginLeft': 'auto'}}>Start Block: {blockNumber || ' loading...'}</h1>
       </div>
-      <InnerContainer className='font-cm'>
+      <InnerContainer className='font-cm lg:w-[1000px]'>
 
         <InnerTop>
           <TitleText>$DIS total stake</TitleText>
           <HolderScore>{numberWithCommas((BigNumber.from(disTotal) / BigNumber.from(dec)).toFixed(4))}</HolderScore>
         </InnerTop>
 
-        <InnerBottom>
+        <InnerBottom className='flex-col lg:flex-row'>
 
           <InnerBottomItem>
             <TitleText>Reward token stored</TitleText>
@@ -533,12 +529,12 @@ export default function Migration() {
             {/* <DescriptionText>DIS/ETHF (day)*</DescriptionText> */}
           </InnerBottomItem>
           <InnerBottomItem>
-            <TitleText>Reward token dynamic</TitleText>
+            <TitleText>Reward token stored</TitleText>
             <SecondScore>{(BigNumber.from(rewardDynamic) / BigNumber.from(dec)).toFixed(4)}</SecondScore>
             {/* <DescriptionText>DIS/ETHF (day)*</DescriptionText> */}
           </InnerBottomItem>
 
-          <InnerBottomItem style={{'borderLeft': '1px solid #1559ed', 'borderRight': '1px solid #1559ed'}}>
+          <InnerBottomItem className='border-t border-b lg:border-l lg:border-r border-[#1559ed]'>
             <TitleText>$DIS Deposited</TitleText>
             {
               accounts
@@ -552,7 +548,7 @@ export default function Migration() {
             <TitleText>$DIS Earned</TitleText>
             {
               accounts
-              ? <SecondScore>{(BigNumber.from(disReward) / BigNumber.from(dec)).toFixed(4)}</SecondScore>
+              ? <SecondScore>{(BigNumber.from(disReward) / BigNumber.from(dec)).toFixed(18)}</SecondScore>
               : <SecondScore>--.--</SecondScore>
             }
             <DefaultButton onClick={() => handleWithdrawRewards()}>Get Reward</DefaultButton>
@@ -560,10 +556,10 @@ export default function Migration() {
 
         </InnerBottom>
 
-        <BalanceContainer>
+        <BalanceContainer className='flex-col lg:flex-row'>
           <WithdrawContainer>
             <TitleText>Deposit</TitleText>
-            <div className='flex items-center gap-4'>
+            <div className='flex flex-col lg:flex-row items-center gap-4'>
               <div className='input-box flex items-center'>
                 <input placeholder='Pledge Quantity' value={pledgeDis} onChange={e => setPledgeDis(e.target.value)} type='number' />
                 <button className='button-max' onClick={() => { handleInputPledgeDis() }}>max</button>
@@ -578,9 +574,9 @@ export default function Migration() {
               </ClipButton>
             </div>
           </WithdrawContainer>
-          <WithdrawContainer style={{'borderLeft': '1px solid #1559ed'}}>
+          <WithdrawContainer className='border-t lg:border-l border-[#1559ed]'>
             <TitleText>Withdraw</TitleText>
-            <div className='flex items-center gap-4'>
+            <div className='flex flex-col lg:flex-row items-center gap-4'>
               <div className='input-box flex items-center'>
                 <input placeholder='Withdraw Quantity' value={withdrawDis} onChange={e => setWithdrawDis(e.target.value)} type='number' />
                 <button className='button-max' onClick={() => { handleInputWithdrawDis() }}>max</button>
@@ -638,7 +634,6 @@ const MigrationContanier = styled.div`
 
 const InnerContainer = styled.div`
   --color: #1559ed;
-  width: 1000px;
   margin: 0 auto;
   border: 1px solid var(--color);
   border-radius: 4px;
