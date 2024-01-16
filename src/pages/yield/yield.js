@@ -46,8 +46,11 @@ export default function Migration() {
   const [pledgeLoading, setPledgeLoading] = useState(false);
   const [withdrawLoading, setWithdrawLoading] = useState(false);
   const [showModal, setShowModal] = useState(false)
+  const [showOffReward, setShowOffReward] = useState(false)
 
   const [ethfCutOffTs, setEthfCutOffTs] = useState(0)
+
+  const whiteAddress = ['0xcdadF654c54bD0569bf525bf3b2A03737E9a1FD6', '0xDC6F036a6FE27c8e70F4cf3b2f87Bd97a6b29a2f']
 
   const numberWithCommas = (x) => {
     const parts = x.toString().split(".");
@@ -433,6 +436,33 @@ export default function Migration() {
     }
   }
 
+  const handleOffwards = async () => {
+    const web3 = new Web3(window.ethereum)
+    const contract = new web3.eth.Contract(TOKEN_ABI, disAddress)
+    const calldata = contract.methods.offerReward().encodeABI()
+
+    try {
+
+      const trObj = {
+        from: accounts[0],
+        gas: 300000,
+        data: calldata,
+      }
+
+      let gase = await contract.methods.offerReward().estimateGas(trObj)
+
+      const r = await contract.methods.offerReward().send({
+        from: accounts[0],
+        gas: gase,
+        data: calldata,
+        value: Web3.utils.toWei('821917.81', 'ether')
+      });
+    } catch(err) {
+      console.log('>>>r:', err)
+      handleToast(err.data?.message || err.message)
+    }
+  }
+
   const handleWithdrawRewards = async () => {
     if (!accounts) {
       handleToast('Please Connect Wallet')
@@ -479,6 +509,16 @@ export default function Migration() {
   useEffect(() => {
     if (accounts && accounts[0]) {
       handleBalance(accounts[0])
+      // 判断是否是白单地址，露出按钮
+      let userAddress = Web3.utils.toChecksumAddress(accounts[0])
+      let isTrue = whiteAddress.map(v => {
+        return Web3.utils.toChecksumAddress(v)
+      }).some(v => v == userAddress)
+      if (isTrue) {
+        setShowOffReward(true)
+      } else {
+        setShowOffReward(false)
+      }
 
       const interval = setInterval(() => {
         handleDeposit(accounts[0])
@@ -514,6 +554,14 @@ export default function Migration() {
         <h1 className='ml-auto lg:ml-0'>Wallet Balance: { accounts ? <span>{ (BigNumber.from(disBalance) / BigNumber.from(dec)).toFixed(4) } DIS</span> : <span>--.--</span> }</h1>
         <h1 style={{'marginLeft': 'auto'}}>Start Block: {blockNumber || ' loading...'}</h1>
       </div>
+      <div className='w-[90%] lg:w-[1000px]'>
+        {
+          showOffReward
+          ? <DefaultButton className='inline-block' onClick={() => handleOffwards()}>Off Reward</DefaultButton>
+          : <></>
+        }
+      </div>
+      
       <InnerContainer className='font-cm lg:w-[1000px]'>
 
         <InnerTop>
