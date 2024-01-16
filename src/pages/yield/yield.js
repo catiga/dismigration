@@ -15,7 +15,7 @@ const ethfRpcProvider = "https://rpc.dischain.xyz/"
 const bscRpcProvider = "https://bsc-dataseed3.ninicoin.io"
 
 const dec = "1000000000000000000"
-const disAddress = '0xD135726adA1Bb395947a871909379d09Aa83d3b3'
+const disAddress = '0x26bdaC451fE5A111a9D8a066c23BD0F099b9E563'
 const startTs = 1697040000
 const web3Ethf = new Web3(new Web3.providers.HttpProvider(ethfRpcProvider));
 
@@ -114,7 +114,7 @@ export default function Migration() {
 
   const getBlockNumber = async() => {
     const ethfLocker = new web3Ethf.eth.Contract(TOKEN_ABI, disAddress)
-    const blockNumber = await ethfLocker.methods.onStartBlock().call()
+    const blockNumber = await ethfLocker.methods.onStartTs().call()
     setBlockNumber(blockNumber.toString())
   }
 
@@ -260,7 +260,7 @@ export default function Migration() {
                 decimals: 18,
               },
               rpcUrls: ['https://rpc.dischain.xyz'],  // 替换为您的链的RPC URL
-              blockExplorerUrls: ['https://explorer.dischain.xyz'],  // 替换为您的链的区块浏览器 URL
+              blockExplorerUrls: ['https://scan.dischain.xyz'],  // 替换为您的链的区块浏览器 URL
             },
           ],
         })
