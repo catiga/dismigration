@@ -118,7 +118,7 @@ export default function Migration() {
   const getBlockNumber = async() => {
     const ethfLocker = new web3Ethf.eth.Contract(TOKEN_ABI, disAddress)
     const blockNumber = await ethfLocker.methods.onStartTs().call()
-    setBlockNumber(blockNumber.toString())
+    setBlockNumber((new Date(Number(blockNumber))).toLocaleString())
   }
 
   const truncateBigNumber = (bigNum, decimalPlaces) => {
@@ -552,7 +552,7 @@ export default function Migration() {
 
       <div className='text-gray-300 w-[90%] lg:w-[1000px] mx-auto font-cm text-base flex flex-col lg:flex-row items-center'>
         <h1 className='ml-auto lg:ml-0'>Wallet Balance: { accounts ? <span>{ (BigNumber.from(disBalance) / BigNumber.from(dec)).toFixed(4) } DIS</span> : <span>--.--</span> }</h1>
-        <h1 style={{'marginLeft': 'auto'}}>Start Block: {blockNumber || ' loading...'}</h1>
+        <h1 style={{'marginLeft': 'auto'}}>Start Block: <span className='ml-2'>{blockNumber || ' loading...'}</span></h1>
       </div>
       <div className='w-[90%] lg:w-[1000px]'>
         {
