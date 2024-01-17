@@ -20,6 +20,7 @@ export default function Header(props) {
   const location = useLocation();
   const history = useHistory();
   const [showToast, setShowToast] = useState(false);
+  const [localAccount, setLocalAccount] = useState(false)
 
   useEffect(() => {
     if (currentTokenBalance) {
@@ -28,7 +29,12 @@ export default function Header(props) {
     if (accounts && accounts.length > 0) {
       setShowWallet(accounts[0].substring(0, 4) + '***' + accounts[0].substring(accounts[0].length - 4))
     }
-  }, [currentTokenBalance, accounts])
+    if (!getLocal('account')) {
+      setLocalAccount(false)
+    } else {
+      setLocalAccount(true)
+    }
+  }, [currentTokenBalance, accounts, getLocal('account')])
 
 
   const handleGotoView = (name) => {
@@ -66,14 +72,14 @@ export default function Header(props) {
             {/* <p className='stake nav' onClick={() => handlePledge()} data-text="Pledge">Pledge</p> */}
             <Link className='stake nav' to='/yield'>Pledge</Link>
           {
-            (!accounts && !getLocal('account')) && <ConnectButton />
+            (!accounts && !localAccount) && <ConnectButton />
           }
 
           {
-            (accounts || getLocal('account')) &&
+            (accounts || localAccount) &&
             <div className='header-top-info'>
               {
-                chainId !== 513100 || (!accounts || !getLocal('account')) &&
+                chainId !== 513100 || (!accounts || !localAccount) &&
                 <ErrorNetwork handleChangeNetwork={handleChangeNetwork} />
               }
               <div>

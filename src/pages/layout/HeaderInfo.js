@@ -30,6 +30,23 @@ export default function HeaderInfo() {
       setShowConnectWallet(false)
     }
   }, [showConnectNetwork, isConnect])
+
+  useEffect(() => {
+    if (window.ethereum) {
+      window.ethereum.request({ method: 'eth_accounts' })
+        .then(accounts => {
+          if (accounts && accounts.length > 0) {
+            setState({
+              accounts: accounts
+            });
+          }
+        })
+        .catch(error => {
+          // 处理错误
+          console.error('Error fetching accounts:', error);
+        });
+    }
+  }, [])
   return (
     <HeaderInfoContanier>
       <Header handleChangeNetwork={() => setShowConnectWallet(true)}/>

@@ -41,15 +41,16 @@ export default function useWallet() {
     setState({
       accounts: account
     })
+    handleNewAccounts(account)
 
     // insert new code
     // Listening for accounts changed event
-    window.ethereum.on('accountsChanged', (accounts) => {
-      console.log('Accounts changed:', accounts);
-      setState({
-        accounts: accounts
-      });
-    });
+    // window.ethereum.on('accountsChanged', (accounts) => {
+    //   console.log('Accounts changed:', accounts);
+    //   setState({
+    //     accounts: accounts
+    //   });
+    // });
     // window.ethereum.on('disconnect', (error) => {
     //   console.log('Disconnected:', error);
     //   setLocal('isConnect', 0);
@@ -79,9 +80,9 @@ export default function useWallet() {
     // getAccounInfo(account)
   }
   const handleNewAccounts = newAccounts => {
-    getNetworkInfo()
-    getCurrentBalance(newAccounts[0])
-    updateAccounts(newAccounts[0])
+    // getNetworkInfo()
+    // getCurrentBalance(newAccounts[0])
+    // updateAccounts(newAccounts[0])
     setLocal('account', newAccounts[0])
     setLocal('isConnect', 1)
   }
@@ -152,16 +153,25 @@ export default function useWallet() {
         handleChainChanged(chainId)
       })
       window.ethereum.on('accountsChanged', (account) => {
-        console.log('accountsChanged====>>>')
-        updateAccounts(account[0])
-        setLocal('account', account[0])
-        getAccounInfo(account)
+        if (account.length > 0) {
+          updateAccounts(account[0])
+          setLocal('account', account[0])
+          getAccounInfo(account)
+          setState({
+            accounts: account
+          })
+        } else {
+          setState({
+            accounts: null
+          })
+          setLocal('account', '')
+        }
       })
       window.ethereum.on('connect', id => {
         // console.log('connect',id)
       })
       window.ethereum.on('disconnect', () => {
-        // console.log('wallet disconnect')
+        console.log('wallet disconnect')
       })
       window.ethereum.on('message', message => {
         // console.log('wallet message', message)
