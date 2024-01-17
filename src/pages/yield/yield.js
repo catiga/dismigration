@@ -586,7 +586,7 @@ export default function Migration() {
 
           <InnerBottomItem>
             <TitleText>Total Reward Pool</TitleText>
-            <SecondScore>{(BigNumber.from(totalPool) / BigNumber.from(dec)).toFixed(4)}</SecondScore>
+            <SecondScore>821,917.81</SecondScore>
             {/* <DescriptionText>DIS/ETHF (day)*</DescriptionText> */}
           </InnerBottomItem>
           <InnerBottomItem>
