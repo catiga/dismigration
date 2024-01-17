@@ -63,7 +63,8 @@ export default function Header(props) {
           <p className='nav' onClick={() => handleGotoView('info')}>Info</p>
           <p className='nav' onClick={() => handleGotoView('community')}>Community</p>
           <p className='nav' onClick={() => handleGotoView('partners')}>Partners</p>
-            <p className='stake nav' onClick={() => handlePledge()} data-text="Pledge">Pledge</p>
+            {/* <p className='stake nav' onClick={() => handlePledge()} data-text="Pledge">Pledge</p> */}
+            <Link className='stake nav' to='/yield'>Pledge</Link>
           {
             (!accounts && !getLocal('account')) && <ConnectButton />
           }

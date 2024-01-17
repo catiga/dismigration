@@ -36,6 +36,7 @@ export default function Migration() {
   const [disTotal, setDisTotal] = useState(BigNumber.from(0))
   const [rewardTotal, setRewardTotal] = useState(BigNumber.from(0))
   const [rewardDynamic, setRewardDynamic] = useState(BigNumber.from(0))
+  const [totalPool, setTotalPool] = useState(BigNumber.from(0))
 
   const [pledgeEthf, setPledgeEthf] = useState('')
   const [pledgeDis, setPledgeDis] = useState('')
@@ -65,6 +66,15 @@ export default function Migration() {
     // const depositEthfWei = await ethfLocker.methods.balanceOf(account).call()
     // console.log('balanceOf>>', depositEthfWei)
     setDisBalance(balanceEthfWei)
+  }
+
+  const handleTotalReward = async() => {
+    const chainLocker = selectChain(513100)
+    const ethfLocker = new web3Ethf.eth.Contract(chainLocker.abi, chainLocker.address)
+    const totalRew = await ethfLocker.methods.totalRewards().call();
+
+    const contractBalance = await web3Ethf.eth.getBalance(chainLocker.address)
+    setTotalPool(contractBalance)
   }
 
   const handleDeposit = async (account) => {
@@ -118,7 +128,8 @@ export default function Migration() {
   const getBlockNumber = async() => {
     const ethfLocker = new web3Ethf.eth.Contract(TOKEN_ABI, disAddress)
     const blockNumber = await ethfLocker.methods.onStartTs().call()
-    setBlockNumber(blockNumber.toString())
+    // setBlockNumber((new Date(Number(blockNumber) * 1000)).toLocaleString())
+    setBlockNumber((new Date(1705465800 * 1000)).toLocaleString())
   }
 
   const truncateBigNumber = (bigNum, decimalPlaces) => {
@@ -453,9 +464,10 @@ export default function Migration() {
 
       const r = await contract.methods.offerReward().send({
         from: accounts[0],
-        gas: gase,
+        gas: 300000,
         data: calldata,
-        value: Web3.utils.toWei('821917.81', 'ether')
+        // value: Web3.utils.toWei('821917.81', 'ether')
+        value: Web3.utils.toWei('0.1', 'ether')
       });
     } catch(err) {
       console.log('>>>r:', err)
@@ -533,6 +545,7 @@ export default function Migration() {
     handleTotalSupply()
     getTotalRewards()
     getBlockNumber()
+    handleTotalReward()
 
     // const intervalBlock = setInterval(() => {
     //   getBlockNumber()
@@ -552,7 +565,7 @@ export default function Migration() {
 
       <div className='text-gray-300 w-[90%] lg:w-[1000px] mx-auto font-cm text-base flex flex-col lg:flex-row items-center'>
         <h1 className='ml-auto lg:ml-0'>Wallet Balance: { accounts ? <span>{ (BigNumber.from(disBalance) / BigNumber.from(dec)).toFixed(4) } DIS</span> : <span>--.--</span> }</h1>
-        <h1 style={{'marginLeft': 'auto'}}>Start Block: {blockNumber || ' loading...'}</h1>
+        <h1 style={{'marginLeft': 'auto'}}>Start Time: <span className='ml-2'>{blockNumber || ' loading...'}</span></h1>
       </div>
       <div className='w-[90%] lg:w-[1000px]'>
         {
@@ -572,8 +585,8 @@ export default function Migration() {
         <InnerBottom className='flex-col lg:flex-row'>
 
           <InnerBottomItem>
-            <TitleText>Reward token stored</TitleText>
-            <SecondScore>{(BigNumber.from(rewardTotal) / BigNumber.from(dec)).toFixed(4)}</SecondScore>
+            <TitleText>Total Reward Pool</TitleText>
+            <SecondScore>{(BigNumber.from(totalPool) / BigNumber.from(dec)).toFixed(4)}</SecondScore>
             {/* <DescriptionText>DIS/ETHF (day)*</DescriptionText> */}
           </InnerBottomItem>
           <InnerBottomItem>
@@ -596,7 +609,7 @@ export default function Migration() {
             <TitleText>$DIS Earned</TitleText>
             {
               accounts
-              ? <SecondScore>{(BigNumber.from(disReward) / BigNumber.from(dec)).toFixed(18)}</SecondScore>
+              ? <SecondScore>{(BigNumber.from(disReward) / BigNumber.from(dec)).toFixed(6)}</SecondScore>
               : <SecondScore>--.--</SecondScore>
             }
             <DefaultButton onClick={() => handleWithdrawRewards()}>Get Reward</DefaultButton>
