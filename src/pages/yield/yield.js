@@ -324,12 +324,12 @@ export default function Migration() {
 
     if (moveon) {
       const pledgeDisWei = web3.utils.toWei(pledgeDis, "ether")
-      // const disLocker = new web3.eth.Contract(TOKEN_ABI, disAddress)
-      const calldata = disLocker.methods.stakeAndReward(pledgeDisWei).encodeABI()
+      const disLocker_1 = new web3.eth.Contract(TOKEN_ABI, disAddress)
+      const calldata = disLocker_1.methods.stakeAndReward(pledgeDisWei).encodeABI()
       
       try {
 
-        const transaction = await disLocker.methods.stakeAndReward(pledgeDisWei).send({
+        const transaction = await disLocker_1.methods.stakeAndReward(pledgeDisWei).send({
           from: accounts[0],
           gas: 300000,
           data: calldata,
