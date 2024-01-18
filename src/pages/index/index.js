@@ -71,7 +71,7 @@ export default function Index() {
                             <div className="swipe-box mt-12">
                                 <ul className="flip2">
                                     <li className="text-xl font-cm">Current Block: {blockNumber !== null ? blockNumber : 'Loading...'}</li>
-                                    <li className="text-xl font-cm">Until Block: ?</li>
+                                    <li className="text-xl font-cm">Start Block: 18751521</li>
                                 </ul>
                             </div>
                             {/* <button className="bg-white text-black mt-8 px-6 py-2 font-cm text-xl rounded-sm">Get Start</button> */}
