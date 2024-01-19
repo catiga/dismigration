@@ -269,13 +269,14 @@ export default function Migration() {
     setPledgeLoading(true)
     let web3;
     if(window.ethereum) {
-      console.log('window.ethereum found, prepare to init...')
       web3 = new Web3(window.ethereum);
-      console.log('window.ethereum found, initialized...')
+      const unlocked = await window.ethereum._metamask.isUnlocked();
+      if (!unlocked) {
+        handleToast('MetaMask is locked');
+        return;
+      }
     } else if (window.web3) {
-      // 如果旧版 web3 已经注入，使用注入的提供者
       web3 = new Web3(window.web3.currentProvider);
-      // 成功后的代码...
     }
     if(!web3) {
       console.log('init web3 failed');
@@ -283,11 +284,22 @@ export default function Migration() {
       setPledgeLoading(false);
       return
     }
-    // await window.ethereum.request({ method: 'eth_requestAccounts' });
-    console.log('start get network id')
-    // const currentNetwork = await web3.eth.net.getId()
-    const currentNetwork = await web3.eth.getChainId();
-    console.log('currentNetwork:', currentNetwork)
+    console.log("insure web3 initializd")
+    const req_accs = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    console.log("insure web3 initializd", req_accs)
+    
+    let currentNetwork = 0;
+    try {
+      currentNetwork = await web3.eth.getChainId();
+      console.log('currentNetwork:', currentNetwork)
+    } catch(e ) {
+      console.log('check chain error:', e)
+    }
+    if(currentNetwork == 0) {
+      handleToast("unable to obtain chain info.")
+      setPledgeLoading(false);
+      return
+    }
     let moveon = false
     
     if (currentNetwork != 513100) {
