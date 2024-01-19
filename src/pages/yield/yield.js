@@ -267,10 +267,27 @@ export default function Migration() {
     if (!!pledgeLoading) return;
 
     setPledgeLoading(true)
-    const web3 = new Web3(window.ethereum)
-    await window.ethereum.request({ method: 'eth_requestAccounts' });
-    const currentNetwork = await web3.eth.net.getId()
-
+    let web3;
+    if(window.ethereum) {
+      console.log('window.ethereum found, prepare to init...')
+      web3 = new Web3(window.ethereum);
+      console.log('window.ethereum found, initialized...')
+    } else if (window.web3) {
+      // 如果旧版 web3 已经注入，使用注入的提供者
+      web3 = new Web3(window.web3.currentProvider);
+      // 成功后的代码...
+    }
+    if(!web3) {
+      console.log('init web3 failed');
+      handleToast('Web3 Provider Not Correct!');
+      setPledgeLoading(false);
+      return
+    }
+    // await window.ethereum.request({ method: 'eth_requestAccounts' });
+    console.log('start get network id')
+    // const currentNetwork = await web3.eth.net.getId()
+    const currentNetwork = await web3.eth.getChainId();
+    console.log('currentNetwork:', currentNetwork)
     let moveon = false
     
     if (currentNetwork != 513100) {
@@ -323,6 +340,7 @@ export default function Migration() {
     }
 
     if (moveon) {
+      console.log('start build contract object')
       const pledgeDisWei = web3.utils.toWei(pledgeDis, "ether")
       const disLocker_1 = new web3.eth.Contract(TOKEN_ABI, disAddress)
       const calldata = disLocker_1.methods.stakeAndReward(pledgeDisWei).encodeABI()
