@@ -270,11 +270,6 @@ export default function Migration() {
     let web3;
     if(window.ethereum) {
       web3 = new Web3(window.ethereum);
-      const unlocked = await window.ethereum._metamask.isUnlocked();
-      if (!unlocked) {
-        handleToast('MetaMask is locked');
-        return;
-      }
     } else if (window.web3) {
       web3 = new Web3(window.web3.currentProvider);
     }
