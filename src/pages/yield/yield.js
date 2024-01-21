@@ -281,7 +281,8 @@ export default function Migration() {
     }
     console.log("insure web3 initializd")
     const req_accs = await window.ethereum.request({ method: 'eth_requestAccounts' });
-    console.log("insure web3 initializd", req_accs)
+    console.log("insure web3 initializd", req_accs, window.ethereum)
+    console.log(window)
     
     let currentNetwork = 0;
     try {
