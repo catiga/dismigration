@@ -23,6 +23,7 @@ import PARTNER01 from '../../assets/images/logo/logo-metamask.svg'
 import PARTNER02 from '../../assets/images/logo/logo-coolwallet.svg'
 import PARTNER03 from '../../assets/images/logo/logo-onekey.svg'
 import PARTNER04 from '../../assets/images/logo/logo-tokenpocket.png'
+import PARTNER05 from '../../assets/images/logo/logo-onklink.webp'
 
 import BANNER from '../../assets/images/bg-banner.webp'
 import Web3 from 'web3';
@@ -165,6 +166,7 @@ export default function Index() {
             <div id="partners" className="section05 px-4 lg:px-40 py-20 text-center">
                 <h1 className="text-4xl text-white font-cs tracking-wider">Partners</h1>
                 <div className="flex flex-col lg:flex-row items-center justify-center gap-8 mt-8">
+                    <img className="h-8" src={PARTNER05} />
                     <img className="h-10" src={PARTNER01} />
                     <img className="h-10" src={PARTNER02} />
                     <img className="h-10" src={PARTNER03} />
