@@ -17,10 +17,15 @@ const bscRpcProvider = "https://bsc-dataseed3.ninicoin.io"
 const dec = "1000000000000000000"
 const disAddress = '0x26bdaC451fE5A111a9D8a066c23BD0F099b9E563'
 const startTs = 1697040000
-const web3Ethf = new Web3(new Web3.providers.HttpProvider(ethfRpcProvider));
+const providerObject = new Web3.providers.HttpProvider(ethfRpcProvider);
+const web3Ethf = new Web3(providerObject);
+
+const disLocker = new web3Ethf.eth.Contract(TOKEN_ABI, disAddress)
 
 export default function Migration() {
   const { accounts, currentTokenBalance } = useGlobal()
+
+  const [currentBlock, setCurrentBlock] = useState(BigNumber.from(0))
 
   const [ethfBalance, setEthfBalance] = useState(BigNumber.from(0))
   const [disBalance, setDisBalance] = useState(BigNumber.from(0))
@@ -49,8 +54,6 @@ export default function Migration() {
   const [showModal, setShowModal] = useState(false)
   const [showOffReward, setShowOffReward] = useState(false)
 
-  const [ethfCutOffTs, setEthfCutOffTs] = useState(0)
-
   const whiteAddress = ['0xcdadF654c54bD0569bf525bf3b2A03737E9a1FD6', '0xDC6F036a6FE27c8e70F4cf3b2f87Bd97a6b29a2f']
 
   const numberWithCommas = (x) => {
@@ -59,77 +62,82 @@ export default function Migration() {
     return parts.join(".");
   }
 
+  const handleLastBlock = () => {
+    web3Ethf.eth.getBlock('latest').then(lastBlock => {
+      setCurrentBlock(lastBlock.number)
+    })
+  }
+
   const handleBalance = async (account) => {
     const balanceEthfWei = await web3Ethf.eth.getBalance(account)
-
-    // const ethfLocker = new web3Ethf.eth.Contract(TOKEN_ABI, disAddress)
-    // const depositEthfWei = await ethfLocker.methods.balanceOf(account).call()
-    // console.log('balanceOf>>', depositEthfWei)
     setDisBalance(balanceEthfWei)
   }
 
-  const handleTotalReward = async() => {
-    const chainLocker = selectChain(513100)
-    const ethfLocker = new web3Ethf.eth.Contract(chainLocker.abi, chainLocker.address)
-    const totalRew = await ethfLocker.methods.totalRewards().call();
+  const handleTotalReward = () => {
+    // const chainLocker = selectChain(513100)
+    // const ethfLocker = new web3Ethf.eth.Contract(chainLocker.abi, chainLocker.address)
 
-    const contractBalance = await web3Ethf.eth.getBalance(chainLocker.address)
-    setTotalPool(contractBalance)
+    web3Ethf.eth.getBalance(disAddress).then(contractBalance => {
+      setTotalPool(contractBalance)
+    })
   }
 
-  const handleDeposit = async (account) => {
-    const ethfLocker = new web3Ethf.eth.Contract(TOKEN_ABI, disAddress)
-    const depositEthfWei = await ethfLocker.methods.deposits(account).call()
-    setDisDeposit(depositEthfWei)
+  const handleDeposit = (account) => {
+    // const ethfLocker = new web3Ethf.eth.Contract(TOKEN_ABI, disAddress)
+    disLocker.methods.deposits(account).call().then(depositEthfWei => {
+      setDisDeposit(depositEthfWei)
+    })
   }
 
-  const handleEthfReward = async (account) => {
+  const handleEthfReward = (account) => {
     // const web3Ethf = new Web3(new Web3.providers.HttpProvider(ethfRpcProvider));
-    const chainLocker = selectChain(513100)
-    const ethfLocker = new web3Ethf.eth.Contract(chainLocker.abi, chainLocker.address)
+    // const chainLocker = selectChain(513100)
+    // const ethfLocker = new web3Ethf.eth.Contract(chainLocker.abi, chainLocker.address)
 
-    const rewardEthfWei = await ethfLocker.methods.earned(account).call()
+    disLocker.methods.earned(account).call().then(rewardEthfWei => {
+      setEthfReward(rewardEthfWei)
+    })
 
-    setEthfReward(rewardEthfWei)
-
-    const ts = await ethfLocker.methods.lastStakeTime(accounts[0]).call()
-    const timerange = Math.floor(new Date().getTime() / 1000) - Number(ts)
-    setLastApplyTs(timerange)
+    disLocker.methods.lastStakeTime(accounts[0]).call().then(ts => {
+      const timerange = Math.floor(new Date().getTime() / 1000) - Number(ts)
+      setLastApplyTs(timerange)
+    })
   }
 
-  const handleDisReward = async (account) => {
-    const disLocker = new web3Ethf.eth.Contract(TOKEN_ABI, disAddress)
-    const rewardDisWei = await disLocker.methods.earned(account).call()
-    setDisReward(rewardDisWei)
+  const handleDisReward = (account) => {
+    // const disLocker = new web3Ethf.eth.Contract(TOKEN_ABI, disAddress)
+    disLocker.methods.earned(account).call().then(rewardDisWei => {
+      setDisReward(rewardDisWei)
+    })
   }
 
-  const handleTotalSupply = async () => {
-    const ethfLocker = new web3Ethf.eth.Contract(TOKEN_ABI, disAddress)
-    const ethfTotalSupply = await ethfLocker.methods.totalSupply().call()
-    setEthfTotal(ethfTotalSupply)
+  const handleTotalSupply = () => {
+    // const ethfLocker = new web3Ethf.eth.Contract(TOKEN_ABI, disAddress)
+    disLocker.methods.totalSupply().call().then(ethfTotalSupply=>{
+      setEthfTotal(ethfTotalSupply)
+    })
 
-    const endTs = await ethfLocker.methods.offBlockTs().call()
-    setEthfCutOffTs(Number(endTs))
-    setDisTotal(Number(endTs))
-
-    const disTotalSupply = await ethfLocker.methods.totalSupply().call()
-    setDisTotal(disTotalSupply)
+    disLocker.methods.totalSupply().call().then(disTotalSupply => {
+      setDisTotal(disTotalSupply)
+    })
   }
 
-  const getTotalRewards = async () => {
-    const ethfLocker = new web3Ethf.eth.Contract(TOKEN_ABI, disAddress)
-    const rewardTotal = await ethfLocker.methods.rewardPerTokenStored().call()
-    setRewardTotal(rewardTotal)
+  const getTotalRewards = () => {
+    disLocker.methods.rewardPerTokenStored().call().then(rewardTotal => {
+      setRewardTotal(rewardTotal)
+    })
 
-    const rewardPerSec = await ethfLocker.methods.rewardPerSec().call()
-    setRewardDynamic(rewardPerSec)
+    disLocker.methods.rewardPerSec().call().then(rewardPerSec => {
+      setRewardDynamic(rewardPerSec)
+    })
   }
 
-  const getBlockNumber = async() => {
-    const ethfLocker = new web3Ethf.eth.Contract(TOKEN_ABI, disAddress)
-    const blockNumber = await ethfLocker.methods.onStartTs().call()
-    // setBlockNumber((new Date(Number(blockNumber) * 1000)).toLocaleString())
-    setBlockNumber((new Date(1705465800 * 1000)).toLocaleString())
+  const getBlockNumber = () => {
+    disLocker.methods.onStartTs().call().then(blockNumber => {
+      setBlockNumber((new Date(1705465800 * 1000)).toLocaleString())
+    }).catch(e => {
+      console.log('err=>>', e)
+    })    
   }
 
   const truncateBigNumber = (bigNum, decimalPlaces) => {
@@ -153,10 +161,15 @@ export default function Migration() {
   }
 
   const handleInputPledgeDis = async () => {
-    if (BigNumber.from(disBalance) == BigNumber.from(0)) {
+    // if (BigNumber.from(disBalance) == BigNumber.from(0)) {
+    //   return
+    // }
+    const gasPrice = '15000000000000000'
+    if(BigNumber.from(disBalance).lte(BigNumber.from(gasPrice))) {
+      handleToast('Not Enough $DIS to pledge')
       return
     }
-    const loadBal = ((BigNumber.from(disBalance)) / BigNumber.from(dec))//.toFixed(4)
+    const loadBal = ((BigNumber.from(disBalance) - BigNumber.from(gasPrice)) / BigNumber.from(dec))//.toFixed(4)
 
     setPledgeDis(truncateBigNumber(loadBal, 4))
   }
@@ -194,7 +207,7 @@ export default function Migration() {
               method: 'wallet_addEthereumChain',
               params: [{
                 chainId: 0x7d44c,
-                chainName: 'EthereumFair',
+                chainName: 'DIS Chain',
                 nativeCurrency: {
                   name: 'DIS',
                   symbol: 'DIS',
@@ -210,13 +223,13 @@ export default function Migration() {
       moveon = true
     }
     if (moveon) {
-      const chainLocker = selectChain(513100)
+      // const chainLocker = selectChain(513100)
       const pledgeEthfWei = web3.utils.toWei(pledgeEthf, "ether")
-      const ethfLocker = new web3.eth.Contract(chainLocker.abi, chainLocker.address)
-      const calldata = ethfLocker.methods.stakeAndReward(pledgeEthfWei).encodeABI()
+      // const ethfLocker = new web3.eth.Contract(chainLocker.abi, chainLocker.address)
+      const calldata = disLocker.methods.stakeAndReward(pledgeEthfWei).encodeABI()
 
       try {
-        const transaction = await ethfLocker.methods.stakeAndReward(pledgeEthfWei).send({
+        const transaction = await disLocker.methods.stakeAndReward(pledgeEthfWei).send({
           from: accounts[0],
           value: web3.utils.toWei(pledgeEthf, "ether"),
           gas: 300000,
@@ -254,10 +267,35 @@ export default function Migration() {
     if (!!pledgeLoading) return;
 
     setPledgeLoading(true)
-    const web3 = new Web3(window.ethereum)
-    await window.ethereum.request({ method: 'eth_requestAccounts' });
-    const currentNetwork = await web3.eth.net.getId()
-
+    let web3;
+    if(window.ethereum) {
+      web3 = new Web3(window.ethereum);
+    } else if (window.web3) {
+      web3 = new Web3(window.web3.currentProvider);
+    }
+    if(!web3) {
+      console.log('init web3 failed');
+      handleToast('Web3 Provider Not Correct!');
+      setPledgeLoading(false);
+      return
+    }
+    console.log("insure web3 initializd")
+    const req_accs = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    console.log("insure web3 initializd", req_accs, window.ethereum)
+    console.log(window)
+    
+    let currentNetwork = 0;
+    try {
+      currentNetwork = await web3.eth.getChainId();
+      console.log('currentNetwork:', currentNetwork)
+    } catch(e ) {
+      console.log('check chain error:', e)
+    }
+    if(currentNetwork == 0) {
+      handleToast("unable to obtain chain info.")
+      setPledgeLoading(false);
+      return
+    }
     let moveon = false
     
     if (currentNetwork != 513100) {
@@ -310,13 +348,14 @@ export default function Migration() {
     }
 
     if (moveon) {
+      console.log('start build contract object')
       const pledgeDisWei = web3.utils.toWei(pledgeDis, "ether")
-      const disLocker = new web3.eth.Contract(TOKEN_ABI, disAddress)
-      const calldata = disLocker.methods.stakeAndReward(pledgeDisWei).encodeABI()
+      const disLocker_1 = new web3.eth.Contract(TOKEN_ABI, disAddress)
+      const calldata = disLocker_1.methods.stakeAndReward(pledgeDisWei).encodeABI()
       
       try {
 
-        const transaction = await disLocker.methods.stakeAndReward(pledgeDisWei).send({
+        const transaction = await disLocker_1.methods.stakeAndReward(pledgeDisWei).send({
           from: accounts[0],
           gas: 300000,
           data: calldata,
@@ -519,6 +558,10 @@ export default function Migration() {
   }
 
   useEffect(() => {
+    handleTotalSupply()
+    getTotalRewards()
+    getBlockNumber()
+    handleTotalReward()
     if (accounts && accounts[0]) {
       handleBalance(accounts[0])
       // 判断是否是白单地址，露出按钮
@@ -536,23 +579,15 @@ export default function Migration() {
         handleDeposit(accounts[0])
         handleEthfReward(accounts[0])
         handleDisReward(accounts[0])
-      }, 1000)
+        handleLastBlock()
+      }, 9000)
 
       return () => {
         clearInterval(interval)
       }
     }
-    handleTotalSupply()
-    getTotalRewards()
-    getBlockNumber()
-    handleTotalReward()
-
-    // const intervalBlock = setInterval(() => {
-    //   getBlockNumber()
-    // }, 2000);
-
-    // return () => clearInterval(intervalBlock);
-  }, [accounts])
+    
+  }, [accounts, ethfDeposit, ethfReward, lastApplyTs, disReward, currentBlock])
 
   return (
     <MigrationContanier>
