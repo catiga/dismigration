@@ -58,6 +58,10 @@ export default function Index() {
         return () => clearInterval(intervalId);
     }, []); // 空数组作为第二个参数，确保 useEffect 只执行一次
 
+    const gotoLink = () => {
+        window.open(`https://oklink.com/dis`)
+    }
+
     return (
         <IndexContainer>
             {/* banner01 */}
@@ -166,7 +170,7 @@ export default function Index() {
             <div id="partners" className="section05 px-4 lg:px-40 py-20 text-center">
                 <h1 className="text-4xl text-white font-cs tracking-wider">Partners</h1>
                 <div className="flex flex-col lg:flex-row items-center justify-center gap-8 mt-8">
-                    <img className="h-8" src={PARTNER05} />
+                    <img onClick={() => gotoLink()} className="h-8 cursor-pointer hover:opacity-80" src={PARTNER05} />
                     <img className="h-10" src={PARTNER01} />
                     <img className="h-10" src={PARTNER02} />
                     <img className="h-10" src={PARTNER03} />
