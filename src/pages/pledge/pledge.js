@@ -376,11 +376,7 @@ export default function Migration() {
       let gase = await contract.methods.withdraw(withdrawDisWei).estimateGas(trObj)
       console.log("gase: ", gase)
 
-      contract.methods.withdraw(withdrawDisWei).send({
-        from: accounts[0],
-        gas: 300000,
-        data: calldata,
-      }).on('receipt', (r) => {
+      contract.methods.withdraw(withdrawDisWei).send(trObj).on('receipt', (r) => {
         console.log("result:", r)
         setWithdrawLoading(false)
       }).on('error', (error) => {
@@ -389,8 +385,7 @@ export default function Migration() {
       })
 
     } catch(error) {
-
-      console.log("err: ", trObj)
+      console.log("error: ", trObj, error)
       setWithdrawLoading(false)
       handleToast(error.data?.message || error.message)
 

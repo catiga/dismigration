@@ -430,11 +430,7 @@ export default function Migration() {
       const balance = await contract.methods.balanceOf(accounts[0]).call();
       console.log('current available:', accounts[0], withdrawDisWei, deposits, balance);
       
-      contract.methods.withdraw(withdrawDisWei).send({
-        from: accounts[0],
-        gas: 300000,
-        data: calldata,
-      }).on('receipt', (r) => {
+      contract.methods.withdraw(withdrawDisWei).send(trObj).on('receipt', (r) => {
         console.log("result:", r)
         setWithdrawLoading(false)
       }).on('error', (error) => {
@@ -443,8 +439,7 @@ export default function Migration() {
       })
 
     } catch(error) {
-
-      console.log("err: ", trObj)
+      console.log("err: ", trObj, error)
       setWithdrawLoading(false)
       handleToast(error.data?.message || error.message)
 
