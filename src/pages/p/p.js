@@ -5,8 +5,8 @@ import { useEffect, useState } from 'react'
 import useGlobal from "../../hooks/useGlobal";
 import Web3 from 'web3';
 import { BigNumber } from 'ethers';
-import { TOKEN_ABI } from '../../abi/index'
-import { selectChain } from '../../data/lockde'
+// import { TOKEN_ABI } from '../../abi/index'
+import { selectChain } from '../../data/p_de'
 import Toast from '../../component/Toast';
 import Modal from '../../component/Modal';
 import Loading from '../../component/LoadingOutlined';
@@ -20,7 +20,10 @@ const startTs = 1697040000
 const providerObject = new Web3.providers.HttpProvider(ethfRpcProvider);
 const web3Ethf = new Web3(providerObject);
 
-const disLocker = new web3Ethf.eth.Contract(TOKEN_ABI, disAddress)
+const chainObj = selectChain(513100)
+// const disLocker = new web3Ethf.eth.Contract(TOKEN_ABI, disAddress)
+const disLocker = new web3Ethf.eth.Contract(chainObj.abi, chainObj.address)
+const TOKEN_ABI = chainObj.abi
 
 console.log('current decimal', dec)
 
@@ -55,6 +58,8 @@ export default function Migration() {
   const [withdrawLoading, setWithdrawLoading] = useState(false);
   const [showModal, setShowModal] = useState(false)
   const [showOffReward, setShowOffReward] = useState(false)
+
+
 
   const whiteAddress = ['0xcdadF654c54bD0569bf525bf3b2A03737E9a1FD6', '0xDC6F036a6FE27c8e70F4cf3b2f87Bd97a6b29a2f']
 
@@ -460,6 +465,7 @@ export default function Migration() {
     }
     const web3 = new Web3(window.ethereum)
     const contract = new web3.eth.Contract(TOKEN_ABI, disAddress)
+    
     const calldata = contract.methods.withdrawAll().encodeABI()
 
     try {
@@ -486,6 +492,7 @@ export default function Migration() {
   const handleOffwards = async () => {
     const web3 = new Web3(window.ethereum)
     const contract = new web3.eth.Contract(TOKEN_ABI, disAddress)
+    
     const calldata = contract.methods.offerReward().encodeABI()
 
     try {
@@ -532,6 +539,7 @@ export default function Migration() {
 
     const web3 = new Web3(window.ethereum)
     const contract = new web3.eth.Contract(TOKEN_ABI, disAddress)
+    
     const calldata = contract.methods.getReward().encodeABI()
 
     try {

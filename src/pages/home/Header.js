@@ -70,7 +70,7 @@ export default function Header(props) {
           <p className='nav' onClick={() => handleGotoView('community')}>Community</p>
           <p className='nav' onClick={() => handleGotoView('partners')}>Partners</p>
             {/* <p className='stake nav' onClick={() => handlePledge()} data-text="Pledge">Pledge</p> */}
-            <Link className='stake nav' to='/yield'>Pledge</Link>
+            <Link className='stake nav' to='/p'>Pledge</Link>
           {
             (!accounts && !localAccount) && <ConnectButton />
           }
