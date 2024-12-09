@@ -596,11 +596,24 @@ export default function Migration() {
 
   return (
     <MigrationContanier>
-
-      <div className='w-[90%] lg:w-[1000px] leading-[1.2]'>
+      {/* <div className='w-[90%] lg:w-[1000px] leading-[1.2]'>
         <h1 className='text-2xl font-cs'>$DIS Staking Mining</h1>
         <p className='text-sm my-2'>Why to Join Mine by Staking?</p>
         <p className='text-sm'>Discover the rewarding world of $DIS, the native coin of Disney Chain, a POW public blockchain where miners can engage in mining operations to earn $DIS tokens. Not just for miners, $DIS holders can also participate in the network by staking their coins, joining the mining process, and reaping rewards. With a steady generation of 0.3171 $DIS per second, entering the Disney Chain ecosystem is not only a venture into a robust POW platform but also an opportunity to share in the ongoing distribution of rewards. Secure your spot in this lucrative mining landscape by acquiring $DIS and staking to earn your share of the digital bounty. Join us and become a part of the Disney Chain community, where your contribution is valued and rewarded every second!</p>
+      </div> */}
+
+      <div className="w-[90%] lg:w-[1000px] leading-[1.6] bg-gray-100 p-6 rounded-md shadow-md">
+        <h1 className="text-3xl font-bold text-red-600 mb-4">$DIS Staking Mining Closure Notice</h1>
+        <p className="text-base my-4 text-gray-700 font-semibold">Important Update on $DIS Staking Mining Program</p>
+        <p className="text-sm text-gray-600 mb-4">
+          <span className="text-red-500 font-bold">We want to thank you</span> for being a part of the $DIS staking mining program. This feature will officially close, and <span className="text-red-500 font-bold">all staking activities will be disabled by December 31, 2024.</span> 
+        </p>
+        <p className="text-sm text-gray-600 mb-4">
+          We strongly encourage all users to <span className="text-blue-600 font-bold underline">withdraw their staked $DIS tokens before this date</span> to avoid any inconvenience. Starting <span className="text-red-500 font-bold">January 1, 2025</span>, withdrawals and staking will no longer be supported.
+        </p>
+        <p className="text-sm text-gray-600">
+          Please make sure to retrieve your staked tokens promptly and finalize your participation in the $DIS staking mining program. <span className="text-green-600 font-bold">Thank you for your support and understanding!</span>
+        </p>
       </div>
 
       <div className='text-gray-300 w-[90%] lg:w-[1000px] mx-auto font-cm text-base flex flex-col lg:flex-row items-center'>
